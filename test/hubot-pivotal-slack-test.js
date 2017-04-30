@@ -1,6 +1,6 @@
 var chai       = require('chai'),
-    DummyRobot = require('./DummyRobot'),
-    hubot      = require("../src/hubot-pivotal-slack.js");
+    DummyRobot = require('./dummy-robot'),
+    hubot      = require("../src/hubot-pivotal-slack");
 
 describe("Test for hubot-pivotal-slack.js", function() {
     // test 
