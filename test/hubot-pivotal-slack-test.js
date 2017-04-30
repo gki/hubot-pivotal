@@ -1,23 +1,13 @@
-// "use strict";
+var chai       = require('chai'),
+    DummyRobot = require('./DummyRobot'),
+    hubot      = require("../src/hubot-pivotal-slack.js");
 
-var chai      = require('chai'),
-    // should    = chai.should(),
-    // sinon     = require('sinon'),
-    // sinonChai = require('sinon-chai'),
-    DummyRobot = require('./DummyRobot');
-
-// import DummyRobot from './DummyRobot';
-
-// chai.use(sinonChai);
-var hubot = require("../src/hubot-pivotal-slack.js");
-
-describe("Sample", function() {
+describe("Test for hubot-pivotal-slack.js", function() {
     // test 
-    it("check respons for hello", function() {
+    it("Check response for hello", function() {
         // this.robot.on("hoge");
         var dummyRobot = new DummyRobot();
         dummyRobot.testRun(hubot, "hello");
-        console.log("output="+ dummyRobot.latestOutput)
         chai.expect(dummyRobot.latestOutput).to.equal("world!");
     });
 });
