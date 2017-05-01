@@ -16,7 +16,7 @@ class DummyRobot {
         };
 
         this.hear = (regix, callback) => {
-            respond(regix, callback);
+            this.respond(regix, callback);
         };
 
         this.captureSend = (message) => {
