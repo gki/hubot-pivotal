@@ -3,14 +3,6 @@
 class DummyRobot {
 
     constructor(props) {
-        this.captureSend = (message) => {
-            this.latestOutput = message;
-        };
-
-        this.latestOutput = (output) => {
-            this._output = output;
-        };
-
         this.respond = (regix, callback) => {
             if (regix.test(this.inputMessage)) {
                 var msg = {
@@ -23,12 +15,12 @@ class DummyRobot {
             }
         };
 
-        this.latestOutput = () => {
-            return this._output;
-        };
-
         this.hear = (regix, callback) => {
             respond(regix, callback);
+        };
+
+        this.captureSend = (message) => {
+            this._output = message;
         };
 
         this.captureEmit = (message) => {
@@ -38,6 +30,7 @@ class DummyRobot {
         this.testRun = (extendedScript, inputMessage) => {
             this.inputMessage = inputMessage;
             extendedScript(this);
+            return this._output;
         };
     }
 }
