@@ -6,9 +6,9 @@ chai.use(require('sinon-chai'));
 chai.use(require('chai-string'));
 
 var DummyRobot   = require('./dummy-robot');
-var targetScript = require("../src/hubot-pivotal-slack");
+var targetScript = require("../src/hubot-pivotal");
 
-describe("Test for hubot-pivotal-slack.js", function() {
+describe("Test for hubot-pivotal.js", function() {
 
     let backupProjectIds;
     // initial setup
