@@ -17,10 +17,10 @@
   "license": "MIT",
   "devDependencies": {
     "chai": "^3.5.0",
-    "coffee-script": "^1.12.5",
-    "hubot": "^2.19.0",
+    "chai-string": "^1.3.0",
     "mocha": "^3.3.0",
     "sinon": "^2.1.0",
     "sinon-chai": "^2.9.0"
-  }
+  },
+  "dependencies": {}
 }

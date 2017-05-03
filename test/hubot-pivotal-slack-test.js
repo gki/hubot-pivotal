@@ -1,11 +1,31 @@
 var chai         = require('chai');
 var sinon        = require('sinon');
 chai.use(require('sinon-chai'));
+chai.use(require('chai-string'));
 
 var DummyRobot   = require('./dummy-robot');
 var targetScript = require("../src/hubot-pivotal-slack");
 
 describe("Test for hubot-pivotal-slack.js", function() {
+
+    var backupProjectIds;
+    // initial setup
+    before(function(done) {
+        backupProjectIds = process.env.PROJECT_IDS;
+        done();
+    });
+
+    // teardown for each test
+    afterEach(function(done) {
+        if (!backupProjectIds) {
+            // revert to undefined.
+            delete process.env.PROJECT_IDS;
+        } else {
+            process.env.PROJECT_IDS = backupProjectIds;
+        }
+        done();
+    });
+
     // test 
     it("Check response for 'hello'", function() {
         var dummyRobot = new DummyRobot();
@@ -31,6 +51,68 @@ describe("Test for hubot-pivotal-slack.js", function() {
         // check
         chai.expect(spyRespond.called).to.not.be.ok;
         chai.expect(reply).to.be.undefined;
+    });
+
+    // test 
+    it("Check  for 'show pivotal projects' w/ multiple project ids.", function() {
+        var dummyRobot = new DummyRobot();
+        var spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        process.env.PROJECT_IDS = "1111,2222,3333";
+        // test
+        var TEST_PROJECT_IDS = process.env.PROJECT_IDS.split(',');
+        var reply = dummyRobot.testRun(targetScript, "show pivotal projects");
+
+        // check
+        chai.expect(spyRespond.called).to.be.ok;
+        var urls = reply.split('\n');
+        // empty line will be added at last.
+        chai.expect(urls).to.have.length(TEST_PROJECT_IDS.length + 1);
+        for (index in urls) {
+            if (urls[index].length == 0) {
+                continue; // skip empty line
+            }
+            chai.expect(urls[index]).to.endsWith(TEST_PROJECT_IDS[index])
+        }
+    });
+
+    // test 
+    it("Check  for 'show pivotal projects' w/ sigle project id.", function() {
+        var dummyRobot = new DummyRobot();
+        var spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        process.env.PROJECT_IDS = "1111";
+        // test
+        var TEST_PROJECT_IDS = process.env.PROJECT_IDS.split(',');
+        var reply = dummyRobot.testRun(targetScript, "show pivotal projects");
+
+        // check
+        chai.expect(spyRespond.called).to.be.ok;
+        var urls = reply.split('\n');
+        // empty line will be added at last.
+        chai.expect(urls).to.have.length(TEST_PROJECT_IDS.length + 1);
+        for (index in urls) {
+            if (urls[index].length == 0) {
+                continue; // skip empty line
+            }
+            chai.expect(urls[index]).to.endsWith(TEST_PROJECT_IDS[index])
+        }
+    });
+
+    // test 
+    it("Check  for 'show pivotal projects' w/ no project ids.", function() {
+        var dummyRobot = new DummyRobot();
+        var spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        delete process.env.PROJECT_IDS;
+
+        // test
+        var reply = dummyRobot.testRun(targetScript, "show pivotal projects");
+
+        // check
+        chai.expect(spyRespond.called).to.be.ok;
+        chai.expect(reply).to.be.singleLine;
+        chai.expect(reply).to.not.contain("http");
     });
 
 });
