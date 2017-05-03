@@ -7,10 +7,6 @@ module.exports = function (robot) {
     var PIVOTAL_WEB_BASE_URL = 'https://www.pivotaltracker.com/n/projects/'
     var PIVOTAL_API_FEILDS = '&fields=name,url,name,story_type,estimate,created_at,current_state,owner_ids'
 
-    // robot.respond(/pivotal newtickets(?: -t ([^\s]+))?(?: (\d+)?)? *$/i, newStoriesCommand('feature,chore'));
-
-    // robot.respond(/pivotal newbugs(?: -t ([^\s]+))?(?: (\d+)?)? *$/i, newStoriesCommand('bug'));
-
     robot.hear(/^.*?\b(?:pivotal|pv)#(\d+)\b.*$/i, messageHandling('story'));
 
     robot.respond(/^show pivotal projects$/i, messageHandling('projects'));
@@ -53,44 +49,6 @@ module.exports = function (robot) {
                 }
             }
         }
-    };
-
-    function newStoriesCommand(command) {
-        return function(msg) {
-            try {
-                var projectName = "All";
-                if (msg.match[1]) {
-                    projectName = getProjectName(msg.match[1]);
-                }
-
-                var baseDate = computeDate(new Date(), -7);
-                
-                if (msg.match[2]) {
-                    if (msg.match[2].length != 4 && msg.match[2].length != 8) {
-                        throw new Error("2nd arg 'base data' should be MMDD or YYYYMMDD");
-                    }
-                    var dateString = msg.match[2];
-                    if (dateString.length == 4) {
-                        dateString = (new Date()).getFullYear() + dateString;
-                    }
-
-                    baseDate = getDateFromDateString(dateString);
-                }
-
-                // confirmation message
-                msg.send("I will show new " + command + " stories created in the week including " + convertToYYYY_MM_DD(baseDate) + " for " + projectName + ".");
-
-                if (/All/.test(projectName)) {
-                    for (index in PROJECT_IDS) {
-                        replyNewStories(msg, PROJECT_IDS[index], baseDate, command) 
-                    };
-                } else {
-                    replyNewStories(msg, projectName, baseDate, command);
-                }
-            } catch (e) {
-                error(e, msg);
-            }
-        };
     };
 
     function getPivotalUrls() {
@@ -141,66 +99,6 @@ module.exports = function (robot) {
                 });
         });
     }
-
-    function replyNewStories(msg, projectId, baseDate, types) {
-        var weekday = baseDate.getDay();
-        var sundayYMD = convertToYYYY_MM_DD(computeDate(baseDate, - (weekday)));
-        var saturdayYMD = convertToYYYY_MM_DD(computeDate(baseDate, 6 - weekday));
-        var filterValue = "created:" + sundayYMD + "..." + saturdayYMD + " type:" + types + " includedone:true";
-
-        var ticketArray = [];
-        robot.http(PIVOTAL_API_BASE_URL
-            + projectId
-            + "/stories?"
-            + "&filter=" + filterValue
-            + PIVOTAL_API_FEILDS)
-        .header('X-TrackerToken', process.env.HUBOT_PIVOTAL_TOKEN)
-        .get()(function(err, resp, body) {
-            var response = "";
-            var jsonRes = JSON.parse(body);
-            var unestimatedCount = 0;
-            var estimatedTotal = 0;
-            if (jsonRes.length > 0) {
-                jsonRes.sort(function(a,b) {
-                    if(a['created_at'] < b['created_at']) return -1;
-                    if(a['created_at'] > b['created_at']) return 1;
-                    return 0;
-                });
-
-                jsonRes.forEach(function(val,index,ar){
-                    var ticketInfo = {};
-                    var point = val['estimate'];
-                    if (typeof point === "undefined") {
-                        point = '-';
-                        unestimatedCount++;
-                        ticketInfo['color'] = 'warning';
-                    } else {
-                        estimatedTotal = estimatedTotal + point;
-                    }
-
-                    if (/accepted/i.test(val['current_state'])) {
-                        ticketInfo['color'] = 'good';
-                    }
-                    ticketInfo['title'] = "#" + val['id'] + " " + val['name'];
-                    ticketInfo['title_link'] = val['url'];
-                    ticketInfo['text'] = "created:" + val['created_at'] + "\ttype:" + val['story_type'] + "\tpoint:" + point + "\tstatus:" + val['current_state'];
-                    ticketArray.push(ticketInfo);
-               });
-            }
-            var header = "Team:" + projectName + " >>> Total "+ jsonRes.length +" tickets, " + estimatedTotal + " points, Unestimated " + unestimatedCount + " tickets.\n"
-                + "filter : `"+filterValue+"`";
-            var formattedResponse = {
-                "text": header,
-                "attachments" : ticketArray
-            }
-            robot.emit('slack.attachment',
-                {
-                    "message" : msg.message,
-                    "text" : header,
-                    "content" : ticketArray
-                });
-        });
-    };
 
     function error(e, msg) {
         var response = RESPONSE_TO_ERROR.replace(/%\{message\}/, e.message);
