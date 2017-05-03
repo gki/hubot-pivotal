@@ -1,3 +1,5 @@
+"use strict";
+
 var chai         = require('chai');
 var sinon        = require('sinon');
 chai.use(require('sinon-chai'));
@@ -8,7 +10,7 @@ var targetScript = require("../src/hubot-pivotal-slack");
 
 describe("Test for hubot-pivotal-slack.js", function() {
 
-    var backupProjectIds;
+    let backupProjectIds;
     // initial setup
     before(function(done) {
         backupProjectIds = process.env.PROJECT_IDS;
@@ -28,11 +30,11 @@ describe("Test for hubot-pivotal-slack.js", function() {
 
     // test 
     it("Check response for 'hello'", function() {
-        var dummyRobot = new DummyRobot();
-        var spyRespond = sinon.spy(dummyRobot, "captureSend");
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
         // test
-        var reply = dummyRobot.testRun(targetScript, "hello");
+        let reply = dummyRobot.testRun(targetScript, "hello");
 
         // check
         // chai.expect(dummyRobot.respond).to.have.been.called();
@@ -42,11 +44,11 @@ describe("Test for hubot-pivotal-slack.js", function() {
 
     // test 
     it("Check response for 'Nice to meet you'", function() {
-        var dummyRobot = new DummyRobot();
-        var spyRespond = sinon.spy(dummyRobot, "captureSend");
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
         // test
-        var reply = dummyRobot.testRun(targetScript, "Nice to meet you");
+        let reply = dummyRobot.testRun(targetScript, "Nice to meet you");
 
         // check
         chai.expect(spyRespond.called).to.not.be.ok;
@@ -55,20 +57,20 @@ describe("Test for hubot-pivotal-slack.js", function() {
 
     // test 
     it("Check  for 'show pivotal projects' w/ multiple project ids.", function() {
-        var dummyRobot = new DummyRobot();
-        var spyRespond = sinon.spy(dummyRobot, "captureSend");
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
         process.env.PROJECT_IDS = "1111,2222,3333";
         // test
-        var TEST_PROJECT_IDS = process.env.PROJECT_IDS.split(',');
-        var reply = dummyRobot.testRun(targetScript, "show pivotal projects");
+        let TEST_PROJECT_IDS = process.env.PROJECT_IDS.split(',');
+        let reply = dummyRobot.testRun(targetScript, "show pivotal projects");
 
         // check
         chai.expect(spyRespond.called).to.be.ok;
-        var urls = reply.split('\n');
+        let urls = reply.split('\n');
         // empty line will be added at last.
         chai.expect(urls).to.have.length(TEST_PROJECT_IDS.length + 1);
-        for (index in urls) {
+        for (let index in urls) {
             if (urls[index].length == 0) {
                 continue; // skip empty line
             }
@@ -78,20 +80,20 @@ describe("Test for hubot-pivotal-slack.js", function() {
 
     // test 
     it("Check  for 'show pivotal projects' w/ sigle project id.", function() {
-        var dummyRobot = new DummyRobot();
-        var spyRespond = sinon.spy(dummyRobot, "captureSend");
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
         process.env.PROJECT_IDS = "1111";
         // test
-        var TEST_PROJECT_IDS = process.env.PROJECT_IDS.split(',');
-        var reply = dummyRobot.testRun(targetScript, "show pivotal projects");
+        let TEST_PROJECT_IDS = process.env.PROJECT_IDS.split(',');
+        let reply = dummyRobot.testRun(targetScript, "show pivotal projects");
 
         // check
         chai.expect(spyRespond.called).to.be.ok;
-        var urls = reply.split('\n');
+        let urls = reply.split('\n');
         // empty line will be added at last.
         chai.expect(urls).to.have.length(TEST_PROJECT_IDS.length + 1);
-        for (index in urls) {
+        for (let index in urls) {
             if (urls[index].length == 0) {
                 continue; // skip empty line
             }
@@ -101,13 +103,13 @@ describe("Test for hubot-pivotal-slack.js", function() {
 
     // test 
     it("Check  for 'show pivotal projects' w/ no project ids.", function() {
-        var dummyRobot = new DummyRobot();
-        var spyRespond = sinon.spy(dummyRobot, "captureSend");
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
         delete process.env.PROJECT_IDS;
 
         // test
-        var reply = dummyRobot.testRun(targetScript, "show pivotal projects");
+        let reply = dummyRobot.testRun(targetScript, "show pivotal projects");
 
         // check
         chai.expect(spyRespond.called).to.be.ok;

@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = function (robot) {
     var RESPONSE_TO_ERROR = 'An error occurred. %{message}';
     if (process.env.PROJECT_IDS) {
@@ -52,16 +54,15 @@ module.exports = function (robot) {
     };
 
     function getPivotalUrls() {
-        var response = "";
-        for (index in PROJECT_IDS) {
-
+        let response = "";
+        for (let index in PROJECT_IDS) {
             response += " " + PIVOTAL_WEB_BASE_URL + PROJECT_IDS[index] + "\n";
         };
         return response;
     };
 
     function replyStorySummary(msg, projectId, storyId) {
-        var ticketArray = [];
+        let ticketArray = [];
 
         robot.http(PIVOTAL_API_BASE_URL
             + projectId
@@ -70,13 +71,13 @@ module.exports = function (robot) {
         .header('X-TrackerToken', process.env.HUBOT_PIVOTAL_TOKEN)
         .get()(function(err, resp, body) {
 
-            var jsonRes = JSON.parse(body);
-            var ticketInfo = {};
+            let jsonRes = JSON.parse(body);
+            let ticketInfo = {};
 
             if (jsonRes['code'] === "unfound_resource") {
                 console.log("Could not fide any ticket for #" + storyId + " in " + projectName);
             } else {
-                    var point = jsonRes['estimate'];
+                    let point = jsonRes['estimate'];
                     if (typeof point === "undefined") {
                         point = '-';
                         ticketInfo['color'] = 'warning';
@@ -101,7 +102,7 @@ module.exports = function (robot) {
     }
 
     function error(e, msg) {
-        var response = RESPONSE_TO_ERROR.replace(/%\{message\}/, e.message);
+        let response = RESPONSE_TO_ERROR.replace(/%\{message\}/, e.message);
         msg.send(response);
     };
 };

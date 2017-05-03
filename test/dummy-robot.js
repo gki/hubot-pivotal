@@ -5,7 +5,7 @@ class DummyRobot {
     constructor(props) {
         this.respond = (regix, callback) => {
             if (regix.test(this.inputMessage)) {
-                var msg = {
+                let msg = {
                     match: regix.exec(this.inputMessage),
                     text: this.inputMessage,
                     send: this.captureSend,
