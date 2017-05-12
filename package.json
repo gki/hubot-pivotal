@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "description": "Hubot script to get Pivotal Tracker information via slack chat.",
   "main": "index.js",
-  "scripts": {
-    "test": "mocha"
-  },
   "keywords": [
     "hubot",
     "slack",
@@ -18,9 +15,16 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-string": "^1.3.0",
+    "hubot": "^2.19.0",
+    "kakashi": "^0.3.2",
     "mocha": "^3.3.0",
     "sinon": "^2.1.0",
     "sinon-chai": "^2.9.0"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "scripts": {
+    "robot": "HUBOT_SHELL_USER_NAME='developer' hubot --adapter shell --name hubot",
+    "robot-debug": "HUBOT_LOG_LEVEL='debug' HUBOT_SHELL_USER_NAME='developer' hubot --adapter shell --name hubot",
+    "test": "mocha"
+  }
 }
