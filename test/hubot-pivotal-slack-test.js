@@ -6,7 +6,7 @@ chai.use(require('sinon-chai'));
 chai.use(require('chai-string'));
 
 var DummyRobot   = require('./dummy-robot');
-var targetScript = require("../src/hubot-pivotal");
+var targetScript = require("../src/scripts/hubot-pivotal");
 
 describe("Test for hubot-pivotal.js", function() {
 
