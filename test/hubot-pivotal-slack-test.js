@@ -117,4 +117,19 @@ describe("Test for hubot-pivotal.js", function() {
         chai.expect(reply).to.not.contain("http");
     });
 
+    // test getProjectName
+    it("Check  for getProjectName", function() {
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        delete process.env.PROJECT_IDS;
+
+        // test
+        let reply = dummyRobot.testRun(targetScript, "show pivotal projects");
+
+        // check
+        chai.expect(spyRespond.called).to.be.ok;
+        chai.expect(reply).to.be.singleLine;
+        chai.expect(reply).to.not.contain("http");
+    });
 });
