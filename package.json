@@ -21,12 +21,10 @@
     "sinon": "^2.1.0",
     "sinon-chai": "^2.9.0"
   },
-  "dependencies": {
-    "sleep-async": "^1.0.1"
-  },
+  "dependencies": {},
   "scripts": {
     "robot": "HUBOT_SHELL_USER_NAME='developer' hubot --adapter shell --name hubot",
     "robot-debug": "HUBOT_LOG_LEVEL='debug' HUBOT_SHELL_USER_NAME='developer' hubot --adapter shell --name hubot",
-    "test": "./script/test && mocha"
+    "test": "./script/test"
   }
 }

@@ -56,7 +56,7 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     // test 
-    it("Check  for 'show pivotal projects' w/ multiple project ids.", function() {
+    it("Check for 'show pivotal projects' w/ multiple project ids.", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
@@ -79,7 +79,7 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     // test 
-    it("Check  for 'show pivotal projects' w/ sigle project id.", function() {
+    it("Check for 'show pivotal projects' w/ sigle project id.", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
@@ -102,7 +102,7 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     // test 
-    it("Check  for 'show pivotal projects' w/ no project ids.", function() {
+    it("Check for 'show pivotal projects' w/ no project ids.", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
@@ -118,18 +118,19 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     // test getProjectName
-    it("Check  for getProjectName", function() {
+    it("Check for getProjectName", function(done) {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
-        delete process.env.PROJECT_IDS;
-
         // test
-        let reply = dummyRobot.testRun(targetScript, "show pivotal projects");
-
-        // check
-        chai.expect(spyRespond.called).to.be.ok;
-        chai.expect(reply).to.be.singleLine;
-        chai.expect(reply).to.not.contain("http");
+        let reply = dummyRobot.testRun(targetScript,
+                                    "show pivotal project name for #12345678",
+                                    function (reply) {
+                                        // check
+                                        console.log(`reply=${reply}`);
+                                        chai.expect(reply).to.equal("Unknown");
+                                        done();
+                                    }
+                                    );
     });
 });
