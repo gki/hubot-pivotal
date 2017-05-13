@@ -9,6 +9,8 @@ class DummyRobot {
         this.mockResponseCallback = null;
         this.capturedCallback = null;
         this.globalHttpOptions = {};
+        this.httpResponseMock = null;
+        this.httpErrorMock = null;
         this.respond = (regix, callback) => {
             if (regix.test(this.inputMessage)) {
                 let msg = {
@@ -45,11 +47,35 @@ class DummyRobot {
 
         this.enableMockResponse = (callback) => {
             this.mockResponseCallback = callback;
-        }
+        };
 
         this.http = (url, options) => {
-            return HttpClient.create(url).header('User-Agent', "Hubot/" + this.version);
+            let client = HttpClient.create(url).header('User-Agent', "Hubot/" + this.version);
+            if (this.httpResponseMock || this.httpErrorMock) {
+                client.get = this._responseMock;
+                client.post = this._responseMock;
+            }
+            return client;
+        };
+
+        this.setHttpResponseMock = (callbackMock) => {
+            this.httpResponseMock = callbackMock;
         }
+
+        this.setHttpErrorMock = (callbackMock) => {
+            this.httpErrorMock = callbackMock;
+        }
+
+        this._responseMock = () => {
+            return (function(_this) {
+                return function(callback) {
+                    let body = _this.httpResponseMock ? _this.httpResponseMock() : null;
+                    let err = _this.httpErrorMock ? _this.httpErrorMock() : null;
+                    callback(null, null, body);
+                    return _this;
+                };
+            })(this);
+        };
     }
 }
 

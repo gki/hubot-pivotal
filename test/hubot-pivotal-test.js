@@ -118,19 +118,43 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     // test getProjectName
-    it("Check for getProjectName", function(done) {
+    it("Check for getProjectName w/ unknown project id.", function(done) {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
+        dummyRobot.setHttpResponseMock(() => {
+            // no "name" in response Json.
+            return '{"foo":"bar"}';
+        });
+        
         // test
         let reply = dummyRobot.testRun(targetScript,
                                     "show pivotal project name for #12345678",
                                     function (reply) {
                                         // check
-                                        console.log(`reply=${reply}`);
                                         chai.expect(reply).to.equal("Unknown");
                                         done();
                                     }
                                     );
     });
+
+    // test getProjectName
+    it("Check for getProjectName w/ normal response.", function(done) {
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        dummyRobot.setHttpResponseMock(() => {
+            return '{"name":"My Project"}';
+        });
+
+        // test
+        let reply = dummyRobot.testRun(targetScript,
+                                       "show pivotal project name for #12345678",
+                                       function (reply) {
+                                            // check
+                                            chai.expect(reply).to.equal("My Project");
+                                            done();
+                                        });
+    });
+
 });
