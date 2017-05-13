@@ -19,7 +19,7 @@ module.exports = function (robot) {
 
     function messageHandling(route) {
         return function(msg) {
-            console.log("route=" + route);
+            // console.log("route=" + route);
             try {
                 if (route == "hello") {
                     msg.send("world!");
@@ -61,7 +61,6 @@ module.exports = function (robot) {
         .timeout(3000)
         .get()(function(err, resp, body) {
             if (err) {
-                console.log(err);
                 msg.send(`Could not get project name for id ${projectId} due to err response.`)
                 return;
             }

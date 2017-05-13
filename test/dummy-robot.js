@@ -52,6 +52,7 @@ class DummyRobot {
         this.http = (url, options) => {
             let client = HttpClient.create(url).header('User-Agent', "Hubot/" + this.version);
             if (this.httpResponseMock || this.httpErrorMock) {
+                // console.log(`Mocked get() and post().`)
                 client.get = this._responseMock;
                 client.post = this._responseMock;
             }
@@ -71,7 +72,7 @@ class DummyRobot {
                 return function(callback) {
                     let body = _this.httpResponseMock ? _this.httpResponseMock() : null;
                     let err = _this.httpErrorMock ? _this.httpErrorMock() : null;
-                    callback(null, null, body);
+                    callback(err, null, body);
                     return _this;
                 };
             })(this);

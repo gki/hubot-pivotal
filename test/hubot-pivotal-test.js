@@ -126,7 +126,7 @@ describe("Test for hubot-pivotal.js", function() {
             // no "name" in response Json.
             return '{"foo":"bar"}';
         });
-        
+
         // test
         let reply = dummyRobot.testRun(targetScript,
                                     "show pivotal project name for #12345678",
@@ -153,6 +153,25 @@ describe("Test for hubot-pivotal.js", function() {
                                        function (reply) {
                                             // check
                                             chai.expect(reply).to.equal("My Project");
+                                            done();
+                                        });
+    });
+
+    // test getProjectName
+    it("Check for getProjectName w/ error response.", function(done) {
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        dummyRobot.setHttpErrorMock(() => {
+            return new Error('dummy errro.');
+        });
+
+        // test
+        let reply = dummyRobot.testRun(targetScript,
+                                       "show pivotal project name for #12345678",
+                                       function (reply) {
+                                            // check
+                                            chai.expect(reply).to.equal("Could not get project name for id 12345678 due to err response.");
                                             done();
                                         });
     });
