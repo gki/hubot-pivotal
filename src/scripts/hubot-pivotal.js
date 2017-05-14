@@ -21,6 +21,8 @@ module.exports = function (robot) {
 
     robot.respond(/add pivotal project #(\d+).*$/i, messageHandling('add_project'));
 
+    robot.respond(/remove pivotal project #(\d+).*$/i, messageHandling('remove_project'));
+
     robot.respond(/hello/i, messageHandling("hello"));
 
     function messageHandling(route) {
@@ -48,6 +50,8 @@ module.exports = function (robot) {
                     replyProjectName(msg, msg.match[1]);
                 } else if (route == 'add_project') {
                     addProject(msg, msg.match[1]);
+                } else if (route == 'remove_project') {
+                    removeProject(msg, msg.match[1]);
                 }
             } catch (e) {
                 error(e, msg);
@@ -136,6 +140,31 @@ module.exports = function (robot) {
                 msg.send(`OK! I've added new project "${name}" for #${projectId}`);
             }
         });
+    }
+
+    function removeProject(msg, projectId) {
+        let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
+        if (!projectsInfo) {
+            msg.send("Hahaha. There is no project info!")
+            return;
+        }
+
+        let targetInfo = projectsInfo[projectId];
+        if (!targetInfo) {
+            msg.send(`Hmm? Project id ${projectId} has not registered to my brain.`)
+            return;
+        }
+
+        let name = targetInfo['name'];
+        delete projectsInfo[projectId];
+        if (Object.keys(projectsInfo).length > 0) {
+            robot.brain.set(BRAIN_KEY_PROJECTS, projectsInfo);
+        } else {
+            // removed all info.
+            robot.brain.remove(BRAIN_KEY_PROJECTS);
+        }
+        robot.brain.save();
+        msg.send(`Done. Project ${name} (#${projectId}) has been deleted from my brain.`);
     }
 
     function replyStorySummary(msg, projectId, storyId) {
