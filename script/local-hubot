@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# bootstrap environment
+source script/bootstrap
+
+HUBOT_LOG_LEVEL='debug' HUBOT_SHELL_USER_NAME='developer' hubot --adapter shell --name hubot
