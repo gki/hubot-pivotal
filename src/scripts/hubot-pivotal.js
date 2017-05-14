@@ -1,5 +1,7 @@
 "use strict";
 
+var pad = require('pad');
+
 module.exports = function (robot) {
     var RESPONSE_TO_ERROR = 'An error occurred. %{message}';
     if (process.env.PROJECT_IDS) {
@@ -9,11 +11,15 @@ module.exports = function (robot) {
     var PIVOTAL_WEB_BASE_URL = 'https://www.pivotaltracker.com/n/projects/'
     var PIVOTAL_API_FEILDS = '&fields=name,url,name,story_type,estimate,created_at,current_state,owner_ids'
 
+    var BRAIN_KEY_PROJECTS = 'projects_info';
+
     robot.hear(/^.*?\b(?:pivotal|pv)#(\d+)\b.*$/i, messageHandling('story'));
 
-    robot.respond(/show pivotal projects/i, messageHandling('projects'));
+    robot.respond(/show pivotal projects/i, messageHandling('show_projects'));
     
-    robot.respond(/show pivotal project name for #(\d+).*$/i, messageHandling('project_name'));
+    // robot.respond(/show pivotal project name for #(\d+).*$/i, messageHandling('project_name'));
+
+    robot.respond(/add pivotal project #(\d+).*$/i, messageHandling('add_project'));
 
     robot.respond(/hello/i, messageHandling("hello"));
 
@@ -26,19 +32,22 @@ module.exports = function (robot) {
                     return;
                 }
 
-                if (!PROJECT_IDS || PROJECT_IDS.length == 0) {
-                    msg.send("No project ids are registered. :(");
-                    return;
-                }
+                // if (!PROJECT_IDS || PROJECT_IDS.length == 0) {
+                //     msg.send("No project ids are registered. :(");
+                //     return;
+                // }
 
-                if (route == 'projects') {
-                    msg.send(getPivotalUrls());
+                if (route == 'show_projects') {
+                    replyProjectsInfo(msg);
+                    // msg.send(getPivotalUrls());
                 } else if (route == 'story') {
                     for (index in PROJECT_IDS) {
                         replyStorySummary(msg, PROJECT_IDS[index], msg.match[1]);
                     }
                 } else if (route == 'project_name') {
                     replyProjectName(msg, msg.match[1]);
+                } else if (route == 'add_project') {
+                    addProject(msg, msg.match[1]);
                 }
             } catch (e) {
                 error(e, msg);
@@ -54,6 +63,22 @@ module.exports = function (robot) {
         return response;
     };
 
+    function replyProjectsInfo(msg) {
+        let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
+        if (!projectsInfo) {
+            msg.send("Hmm? There is no project info. Tell me your project id by `add pivotal project #nnnnnnnn`. ;) ")
+            return;
+        }
+
+        let response = "";
+        for (let key in projectsInfo) {
+            let info = projectsInfo[key];
+            response += `${pad(info['name'], 15)} ${info['url']}\n${info['description']}\n\n`;
+        }
+        msg.send("Here you are!");
+        msg.send(response);
+    }
+
     function replyProjectName(msg, projectId) {
         let name = "Unknown"
         robot.http(PIVOTAL_API_BASE_URL + projectId)
@@ -64,11 +89,52 @@ module.exports = function (robot) {
                 msg.send(`Could not get project name for id ${projectId} due to err response.`)
                 return;
             }
-            var jsonRes = JSON.parse(body);
+            let jsonRes = JSON.parse(body);
             if (jsonRes['name']) {
                 name = jsonRes['name'];
             }
             msg.send(name);
+        });
+    }
+
+    function addProject(msg, projectId) {
+        let name = "Unknown"
+        robot.http(PIVOTAL_API_BASE_URL + projectId)
+        .header('X-TrackerToken', process.env.HUBOT_PIVOTAL_TOKEN)
+        .timeout(3000)
+        .get()(function(err, resp, body) {
+            if (err) {
+                msg.send(`Could not add project for id ${projectId} due to err response.`)
+                return;
+            }
+            let jsonRes = JSON.parse(body);
+            let name = jsonRes['name'];
+            if (!name) {
+                msg.send(`Could not add project for id ${projectId}. Check permission or project id on your pivotal project.`)
+                return;
+            }
+
+            let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
+            projectsInfo = projectsInfo ? projectsInfo : {};
+
+            let description = jsonRes['description'];
+            description = description ? description : "No description for this project."
+            let url = PIVOTAL_WEB_BASE_URL + projectId;
+
+            let isProjectInfoExist = projectsInfo[projectId];
+
+            projectsInfo[projectId] = {
+                    name: name,
+                    description: description,
+                    url: url
+                };
+
+            robot.brain.set(BRAIN_KEY_PROJECTS, projectsInfo);
+            if (isProjectInfoExist) {
+                msg.send(`OK! I've updated project "${name}" for #${projectId} with the latest info.`);
+            } else {
+                msg.send(`OK! I've added new project "${name}" for #${projectId}`);
+            }
         });
     }
 
