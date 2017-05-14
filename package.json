@@ -21,10 +21,11 @@
     "sinon": "^2.1.0",
     "sinon-chai": "^2.9.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "pad": "^1.1.0"
+  },
   "scripts": {
-    "robot": "HUBOT_SHELL_USER_NAME='developer' hubot --adapter shell --name hubot",
-    "robot-debug": "HUBOT_LOG_LEVEL='debug' HUBOT_SHELL_USER_NAME='developer' hubot --adapter shell --name hubot",
+    "local-hubot": "./script/local-hubot",
     "test": "./script/test"
   }
 }
