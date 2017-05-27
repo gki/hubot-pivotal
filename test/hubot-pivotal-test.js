@@ -137,8 +137,8 @@ describe("Test for hubot-pivotal.js", function() {
         chai.expect(reply).to.not.contain("http");
     });
 
-    // test getProjectName
-    it("Check for getProjectName w/ unknown project id.", function(done) {
+    // test addProjectName
+    it("Check for addProjectName w/ unknown project id.", function(done) {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
@@ -148,37 +148,50 @@ describe("Test for hubot-pivotal.js", function() {
         });
 
         // test
-        let reply = dummyRobot.testRun(targetScript,
-                                    "show pivotal project name for #12345678",
-                                    function (reply) {
-                                        // check
-                                        chai.expect(reply).to.equal("Unknown");
-                                        done();
-                                    }
-                                    );
+        let reply = dummyRobot.testRun(
+            targetScript,
+            "add pivotal project #12345678",
+            function (reply) {
+                // check
+                chai.expect(reply).to.have.string("Could not add project");
+                done();
+            }
+        );
     });
 
-    // test getProjectName
-    it("Check for getProjectName w/ normal response.", function(done) {
+    // test addProjectName
+    it("Check for addProjectName w/ normal response.", function(done) {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
         dummyRobot.setHttpResponseMock(() => {
-            return '{"name":"My Project"}';
+            return '{"name":"My Project", "url":"http://my.project", "description":"Hello!"}';
         });
 
         // test
-        let reply = dummyRobot.testRun(targetScript,
-                                       "show pivotal project name for #12345678",
-                                       function (reply) {
-                                            // check
-                                            chai.expect(reply).to.equal("My Project");
-                                            done();
-                                        });
+        let reply = dummyRobot.testRun(
+            targetScript,
+            "add pivotal project #12345678",
+            function (reply) {
+                // check
+                try {
+                   chai.expect(reply).to.have.string("OK!");
+                   let storedData = dummyRobot.brain.get(BRAIN_KEY_PROJECTS);
+                   chai.expect(storedData[12345678]).to.be.not.empty;
+                   chai.expect(storedData[12345678]['name']).to.equal('My Project');
+                   chai.expect(storedData[12345678]['url']).to.endWith('12345678');
+                   chai.expect(storedData[12345678]['description']).to.equal('Hello!');
+                } catch (err) {
+                    done(err);
+                    return;
+                }
+
+                done();
+            });
     });
 
-    // test getProjectName
-    it("Check for getProjectName w/ error response.", function(done) {
+    // test addProjectName
+    it("Check for addProjectName w/ error response.", function(done) {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
@@ -187,13 +200,13 @@ describe("Test for hubot-pivotal.js", function() {
         });
 
         // test
-        let reply = dummyRobot.testRun(targetScript,
-                                       "show pivotal project name for #12345678",
-                                       function (reply) {
-                                            // check
-                                            chai.expect(reply).to.equal("Could not get project name for id 12345678 due to err response.");
-                                            done();
-                                        });
+        let reply = dummyRobot.testRun(
+            targetScript,
+            "add pivotal project #12345678",
+            function (reply) {
+                // check
+                chai.expect(reply).to.have.string("Could not add project");
+                done();
+            });
     });
-
 });
