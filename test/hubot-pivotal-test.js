@@ -165,7 +165,7 @@ describe("Test for hubot-pivotal.js", function() {
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
         dummyRobot.setHttpResponseMock(() => {
-            return '{"name":"My Project", "url":"http://my.project", "description":"Hello!"}';
+            return '{"name":"My Project", "description":"Hello!"}';
         });
 
         // test
