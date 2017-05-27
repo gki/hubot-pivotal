@@ -1,12 +1,10 @@
 {
-  "name": "hubot-pivotal-slack",
+  "name": "hubot-pivotal",
   "version": "0.1.0",
-  "description": "Hubot script to get Pivotal Tracker information via slack chat.",
+  "description": "Hubot script to get Pivotal Tracker information.",
   "main": "index.js",
   "keywords": [
     "hubot",
-    "slack",
-    "pivotal",
     "pivotal",
     "tracker"
   ],
@@ -16,7 +14,6 @@
     "chai": "^3.5.0",
     "chai-string": "^1.3.0",
     "hubot": "^2.19.0",
-    "kakashi": "^0.3.2",
     "mocha": "^3.3.0",
     "sinon": "^2.1.0",
     "sinon-chai": "^2.9.0"
