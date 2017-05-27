@@ -11,6 +11,8 @@ var targetScript = require("../src/scripts/hubot-pivotal");
 describe("Test for hubot-pivotal.js", function() {
 
     let backupProjectIds;
+    let BRAIN_KEY_PROJECTS = 'projects_info';
+
     // initial setup
     before(function(done) {
         backupProjectIds = process.env.PROJECT_IDS;
@@ -60,22 +62,34 @@ describe("Test for hubot-pivotal.js", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
-        process.env.PROJECT_IDS = "1111,2222,3333";
+        // process.env.PROJECT_IDS = "1111,2222,3333";
+        let testData = {
+            1111 : {
+                name: 'project A',
+                url: 'http//test/a',
+                description: 'description for A'
+            },
+            2222 : {
+                name: 'project B',
+                url: 'http//test/b',
+                description: 'description for B'
+            },
+            3333 : {
+                name: 'project C',
+                url: 'http//test/c',
+                description: 'description for C'
+            }
+        }
+
+        dummyRobot.brain.set(BRAIN_KEY_PROJECTS, testData);
         // test
-        let TEST_PROJECT_IDS = process.env.PROJECT_IDS.split(',');
         let reply = dummyRobot.testRun(targetScript, "show pivotal projects");
 
         // check
         chai.expect(spyRespond.called).to.be.ok;
-        let urls = reply.split('\n');
+        let lines = reply.split('\n');
         // empty line will be added at last.
-        chai.expect(urls).to.have.length(TEST_PROJECT_IDS.length + 1);
-        for (let index in urls) {
-            if (urls[index].length == 0) {
-                continue; // skip empty line
-            }
-            chai.expect(urls[index]).to.endsWith(TEST_PROJECT_IDS[index])
-        }
+        chai.expect(lines).to.have.length(Object.keys(testData).length * 3 + 1);
     });
 
     // test 
@@ -83,21 +97,29 @@ describe("Test for hubot-pivotal.js", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
-        process.env.PROJECT_IDS = "1111";
+        let testData = {
+            1111 : {
+                name: 'project A',
+                url: 'http//test/a',
+                description: 'description for A'
+            }
+        };
+        dummyRobot.brain.set(BRAIN_KEY_PROJECTS, testData);
+
         // test
-        let TEST_PROJECT_IDS = process.env.PROJECT_IDS.split(',');
         let reply = dummyRobot.testRun(targetScript, "show pivotal projects");
 
         // check
         chai.expect(spyRespond.called).to.be.ok;
-        let urls = reply.split('\n');
+        let lines = reply.split('\n');
         // empty line will be added at last.
-        chai.expect(urls).to.have.length(TEST_PROJECT_IDS.length + 1);
-        for (let index in urls) {
-            if (urls[index].length == 0) {
-                continue; // skip empty line
-            }
-            chai.expect(urls[index]).to.endsWith(TEST_PROJECT_IDS[index])
+        chai.expect(lines).to.have.length(4);
+        for (let index in lines) {
+            chai.expect(lines[0]).to.include((testData[1111])['name']);
+            chai.expect(lines[0]).to.include(testData[1111]['url']);
+            chai.expect(lines[1]).to.include(testData[1111]['description']);
+            chai.expect(lines[2]).to.have.length(0);
+            chai.expect(lines[3]).to.have.length(0);
         }
     });
 
@@ -105,8 +127,6 @@ describe("Test for hubot-pivotal.js", function() {
     it("Check for 'show pivotal projects' w/ no project ids.", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
-
-        delete process.env.PROJECT_IDS;
 
         // test
         let reply = dummyRobot.testRun(targetScript, "show pivotal projects");

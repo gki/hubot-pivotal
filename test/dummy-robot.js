@@ -11,6 +11,8 @@ class DummyRobot {
         this.globalHttpOptions = {};
         this.httpResponseMock = null;
         this.httpErrorMock = null;
+        this.brainData = {_private: {}}
+
         this.respond = (regix, callback) => {
             if (regix.test(this.inputMessage)) {
                 let msg = {
@@ -77,6 +79,21 @@ class DummyRobot {
                 };
             })(this);
         };
+
+        this.brain = {
+            get   : (key) => {
+                return this.brainData[key] ? this.brainData[key] : null;
+            },
+            set   : (key, value) => {
+                this.brainData[key] = value
+            },
+            save  : () => {
+                // do nothing console.log('called seve.')
+            },
+            remove: (key) => {
+                delete brainData[key];
+            },
+        }
     }
 }
 
