@@ -153,7 +153,12 @@ describe("Test for hubot-pivotal.js", function() {
             "add pivotal project #12345678",
             function (reply) {
                 // check
-                chai.expect(reply).to.have.string("Could not add project");
+                try {
+                    chai.expect(reply).to.have.string("Could not add project");
+                } catch (err) {
+                    done(err);
+                    return;
+                }
                 done();
             }
         );
@@ -205,7 +210,12 @@ describe("Test for hubot-pivotal.js", function() {
             "add pivotal project #12345678",
             function (reply) {
                 // check
-                chai.expect(reply).to.have.string("Could not add project");
+                try {
+                    chai.expect(reply).to.have.string("Could not add project");
+                } catch (err) {
+                    done(err);
+                    return;
+                }
                 done();
             });
     });
