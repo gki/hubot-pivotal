@@ -43,9 +43,7 @@ module.exports = function (robot) {
                     replyProjectsInfo(msg);
                     // msg.send(getPivotalUrls());
                 } else if (route == 'story') {
-                    for (index in PROJECT_IDS) {
-                        replyStorySummary(msg, PROJECT_IDS[index], msg.match[1]);
-                    }
+                    replyStorySummary(msg, msg.match[1]);
                 } else if (route == 'project_name') {
                     replyProjectName(msg, msg.match[1]);
                 } else if (route == 'add_project') {
@@ -128,9 +126,10 @@ module.exports = function (robot) {
             let isProjectInfoExist = projectsInfo[projectId];
 
             projectsInfo[projectId] = {
-                    name: name,
-                    description: description,
-                    url: url
+                    id          : projectId,
+                    name        : name,
+                    description : description,
+                    url         : url
                 };
 
             robot.brain.set(BRAIN_KEY_PROJECTS, projectsInfo);
@@ -167,44 +166,36 @@ module.exports = function (robot) {
         msg.send(`Done. Project ${name} (#${projectId}) has been deleted from my brain.`);
     }
 
-    function replyStorySummary(msg, projectId, storyId) {
-        let ticketArray = [];
+    function replyStorySummary(msg, storyId) {
+        let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
+        if (!projectsInfo) {
+            msg.send("Hmm? There is no project info. Tell me your project id by `add pivotal project #nnnnnnnn`. ;) ")
+            return;
+        }
 
+        for (let key in projectsInfo) {
+            _replyStorySummary(msg, projectsInfo[key], storyId);
+        }
+    }
+
+    function _replyStorySummary(msg, projectInfo, storyId) {
         robot.http(PIVOTAL_API_BASE_URL
-            + projectId
+            + projectInfo["id"]
             + "/stories"
             + "/" + storyId)
         .header('X-TrackerToken', process.env.HUBOT_PIVOTAL_TOKEN)
         .timeout(3000)
         .get()(function(err, resp, body) {
-
             let jsonRes = JSON.parse(body);
-            let ticketInfo = {};
 
             if (jsonRes['code'] === "unfound_resource") {
-                console.log("Could not fide any ticket for #" + storyId + " in " + projectName);
+                console.log("Could not fide any ticket for #" + storyId + " in " + projectInfo["name"]);
             } else {
-                    let point = jsonRes['estimate'];
-                    if (typeof point === "undefined") {
-                        point = '-';
-                        ticketInfo['color'] = 'warning';
-                    }
-
-                    if (/accepted/i.test(jsonRes['current_state'])) {
-                        ticketInfo['color'] = 'good';
-                    }
-                    console.log("Response content will be : " + "#" + jsonRes['id'] + " " + jsonRes['name']);
-
-                    ticketInfo['title'] = "#" + jsonRes['id'] + " " + jsonRes['name'];
-                    ticketInfo['title_link'] = jsonRes['url'];
-                    ticketInfo['text'] = "created:" + jsonRes['created_at'] + "\ttype:" + jsonRes['story_type'] + "\tpoint:" + point + "\tstatus:" + jsonRes['current_state'];
+                    let response = `#${jsonRes['id']} ${jsonRes['name']}\n` +
+                                   `${jsonRes['url']} at ${projectInfo["name"]}\n` +
+                                   `Type:${jsonRes['story_type']} Status:${jsonRes['current_state']} Point:${jsonRes['estimate']}`;
+                    msg.send(response);
             }
-
-            robot.emit('slack.attachment',
-                {
-                    "message" : msg.message,
-                    "content" : ticketInfo
-                });
         });
     }
 
