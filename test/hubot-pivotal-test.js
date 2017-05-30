@@ -224,7 +224,6 @@ describe("Test for hubot-pivotal.js", function() {
             });
     });
 
-        // test addProjectName
     it("show story summary w/ normal response.", function(done) {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
@@ -278,5 +277,43 @@ describe("Test for hubot-pivotal.js", function() {
                 }
                 done();
             });
+    });
+
+    it("show story summary w/ no project info.", function() {
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+        // test
+        let reply = dummyRobot.testRun(
+            targetScript,
+            "let me check pv#12345678, please."
+        );
+        // check
+        chai.expect(spyRespond.called).to.be.ng;
+    });
+
+    it("show story summary w/ error response.", function() {
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        dummyRobot.setHttpResponseMock(() => {
+            return '{"code": "unfound_resource"}';
+        });
+
+        let testData = {
+            1111 : {
+                id  : 1111,
+                name: 'project A',
+                url: 'http//test/a',
+                description: 'description for A'
+            }
+        };
+        dummyRobot.brain.set(BRAIN_KEY_PROJECTS, testData);
+
+        // test
+        let reply = dummyRobot.testRun(
+            targetScript,
+            "let me check pv#12345678, please.");
+        // check
+        chai.expect(spyRespond.called).to.be.ng;
     });
 });
