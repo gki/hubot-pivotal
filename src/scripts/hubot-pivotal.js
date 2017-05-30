@@ -169,7 +169,7 @@ module.exports = function (robot) {
     function replyStorySummary(msg, storyId) {
         let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
         if (!projectsInfo) {
-            msg.send("Hmm? There is no project info. Tell me your project id by `add pivotal project #nnnnnnnn`. ;) ")
+            console.log("Ignore because there is no pivotal projet info in brain.")
             return;
         }
 
@@ -187,7 +187,6 @@ module.exports = function (robot) {
         .timeout(3000)
         .get()(function(err, resp, body) {
             let jsonRes = JSON.parse(body);
-
             if (jsonRes['code'] === "unfound_resource") {
                 console.log("Could not fide any ticket for #" + storyId + " in " + projectInfo["name"]);
             } else {
