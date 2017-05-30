@@ -31,7 +31,7 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     // test 
-    it("Check response for 'hello'", function() {
+    it("hello", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
@@ -45,7 +45,7 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     // test 
-    it("Check response for 'Nice to meet you'", function() {
+    it("Nice to meet you", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
@@ -58,7 +58,7 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     // test 
-    it("Check for 'show pivotal projects' w/ multiple project ids.", function() {
+    it("show projects w/ multiple project ids.", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
@@ -93,7 +93,7 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     // test 
-    it("Check for 'show pivotal projects' w/ sigle project id.", function() {
+    it("show projects w/ sigle project id.", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
@@ -124,7 +124,7 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     // test 
-    it("Check for 'show pivotal projects' w/ no project ids.", function() {
+    it("show projects w/ no project ids.", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
@@ -138,7 +138,7 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     // test addProjectName
-    it("Check for addProjectName w/ unknown project id.", function(done) {
+    it("add project w/ unknown project id.", function(done) {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
@@ -165,7 +165,7 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     // test addProjectName
-    it("Check for addProjectName w/ normal response.", function(done) {
+    it("add project w/ normal response.", function(done) {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
@@ -196,7 +196,7 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     // test addProjectName
-    it("Check for addProjectName w/ error response.", function(done) {
+    it("add project w/ error response.", function(done) {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
