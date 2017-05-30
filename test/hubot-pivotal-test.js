@@ -65,16 +65,19 @@ describe("Test for hubot-pivotal.js", function() {
         // process.env.PROJECT_IDS = "1111,2222,3333";
         let testData = {
             1111 : {
+                id: 1111,
                 name: 'project A',
                 url: 'http//test/a',
                 description: 'description for A'
             },
             2222 : {
+                id: 2222,
                 name: 'project B',
                 url: 'http//test/b',
                 description: 'description for B'
             },
             3333 : {
+                id: 3333,
                 name: 'project C',
                 url: 'http//test/c',
                 description: 'description for C'
@@ -99,6 +102,7 @@ describe("Test for hubot-pivotal.js", function() {
 
         let testData = {
             1111 : {
+                id  : 1111,
                 name: 'project A',
                 url: 'http//test/a',
                 description: 'description for A'
@@ -212,6 +216,62 @@ describe("Test for hubot-pivotal.js", function() {
                 // check
                 try {
                     chai.expect(reply).to.have.string("Could not add project");
+                } catch (err) {
+                    done(err);
+                    return;
+                }
+                done();
+            });
+    });
+
+        // test addProjectName
+    it("show story summary w/ normal response.", function(done) {
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+        let testResponse = {
+            kind: 'story',
+            id: 12345678,
+            created_at: '2017-02-15T05:36:01Z',
+            updated_at: '2017-05-30T11:15:56Z',
+            estimate: 1,
+            story_type: 'bug',
+            name: 'This is a test ticket',
+            description: 'Description for test ticket.',
+            current_state: 'planned',
+            requested_by_id: 2222222,
+            url: 'https://www.pivotaltracker.com/story/show/12345678',
+            project_id: 3333333,
+            owner_ids: [],
+            labels: []
+        }
+
+        dummyRobot.setHttpResponseMock(() => {
+            return JSON.stringify(testResponse);
+        });
+
+        let testData = {
+            1111 : {
+                id  : 1111,
+                name: 'project A',
+                url: 'http//test/a',
+                description: 'description for A'
+            }
+        };
+        dummyRobot.brain.set(BRAIN_KEY_PROJECTS, testData);
+
+        // test
+        let reply = dummyRobot.testRun(
+            targetScript,
+            "let me check pv#12345678, please.",
+            function (reply) {
+                // check
+                try {
+                    chai.expect(reply).to.have.string("This is a test ticket");
+                    chai.expect(reply).to.have.string("#12345678");
+                    chai.expect(reply).to.have.string("https://www.pivotaltracker.com");
+                    chai.expect(reply).to.have.string("Type:bug");
+                    chai.expect(reply).to.have.string("Status:planned");
+                    chai.expect(reply).to.have.string("Point:1");
                 } catch (err) {
                     done(err);
                     return;
