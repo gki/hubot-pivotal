@@ -31,33 +31,6 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     // test 
-    it("hello", function() {
-        let dummyRobot = new DummyRobot();
-        let spyRespond = sinon.spy(dummyRobot, "captureSend");
-
-        // test
-        let reply = dummyRobot.testRun(targetScript, "hello");
-
-        // check
-        // chai.expect(dummyRobot.respond).to.have.been.called();
-        chai.expect(spyRespond.called).to.be.ok;
-        chai.expect(reply).to.equal("world!");
-    });
-
-    // test 
-    it("Nice to meet you", function() {
-        let dummyRobot = new DummyRobot();
-        let spyRespond = sinon.spy(dummyRobot, "captureSend");
-
-        // test
-        let reply = dummyRobot.testRun(targetScript, "Nice to meet you");
-
-        // check
-        chai.expect(spyRespond.called).to.not.be.ok;
-        chai.expect(reply).to.be.undefined;
-    });
-
-    // test 
     it("show projects w/ multiple project ids.", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");

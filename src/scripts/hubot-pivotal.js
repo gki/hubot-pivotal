@@ -23,7 +23,7 @@ module.exports = function (robot) {
 
     robot.respond(/remove pivotal project #(\d+).*$/i, messageHandling('remove_project'));
 
-    robot.respond(/hello/i, messageHandling("hello"));
+    // robot.respond(/hello/i, messageHandling("hello"));
 
     function messageHandling(route) {
         return function(msg) {
