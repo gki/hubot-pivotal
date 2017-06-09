@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/gki/hubot-pivotal.svg?branch=master)](https://travis-ci.org/gki/hubot-pivotal)
+[![Dependency Status](https://gemnasium.com/badges/github.com/gki/hubot-pivotal.svg)](https://gemnasium.com/github.com/gki/hubot-pivotal)
 
 # hubot-pivotal
 hubot plugin for pivotal tracker
