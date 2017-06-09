@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/gki/hubot-pivotal.svg?branch=master)](https://travis-ci.org/gki/hubot-pivotal)
+
 # hubot-pivotal
 hubot plugin for pivotal tracker
 
