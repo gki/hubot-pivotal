@@ -24,6 +24,17 @@
   },
   "scripts": {
     "local-hubot": "./script/local-hubot",
-    "test": "./node_modules/.bin/istanbul cover _mocha"
-  }
+    "test": "istanbul cover _mocha"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gki/hubot-pivotal.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gki/hubot-pivotal/issues"
+  },
+  "homepage": "https://github.com/gki/hubot-pivotal#readme"
 }
