@@ -312,4 +312,29 @@ describe("Test for hubot-pivotal.js", function() {
         chai.expect(reply).to.have.string("Done");
         chai.expect(dummyRobot.brain.get(BRAIN_KEY_PROJECTS)).to.be.null;
     });
+
+    it("remove project w/ wrong project id.", function() {
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        let testData = {
+            1111 : {
+                id  : 1111,
+                name: 'project A',
+                url: 'http//test/a',
+                description: 'description for A'
+            }
+        };
+        dummyRobot.brain.set(BRAIN_KEY_PROJECTS, testData);
+
+        // test
+        let reply = dummyRobot.testRun(targetScript, "remove pivotal project #2222");
+
+        // check
+        chai.expect(spyRespond.called).to.be.ok;
+        chai.expect(reply).to.have.string("not registered");
+        let remainingData = dummyRobot.brain.get(BRAIN_KEY_PROJECTS);
+        chai.expect(remainingData).to.be.not.null;
+        chai.expect(remainingData["1111"]).to.be.not.null;
+    });
 });
