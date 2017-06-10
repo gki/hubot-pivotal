@@ -136,18 +136,22 @@ module.exports = function (robot) {
             + "/" + storyId)
         .get()(function(err, resp, body) {
             if (err) {
-                msg.send(`Could not get ticket info for story id ${storyId} of project id ${projectInfo["id"]} due to err response.`)
+                // no need to reply
+                console.log(`Could not get ticket info for story id ${storyId} of project id ${projectInfo["id"]} due to err response.`)
                 return;
             }
+            
             let jsonRes = JSON.parse(body);
             if (jsonRes['code'] === "unfound_resource") {
+                // no need to reply
                 console.log("Could not find any ticket for #" + storyId + " in " + projectInfo["name"]);
-            } else {
-                    let response = `#${jsonRes['id']} ${jsonRes['name']}\n` +
-                                   `${jsonRes['url']} at ${projectInfo["name"]}\n` +
-                                   `Type:${jsonRes['story_type']} Status:${jsonRes['current_state']} Point:${jsonRes['estimate']}`;
-                    msg.send(response);
+                return;
             }
+
+            let response = `#${jsonRes['id']} ${jsonRes['name']}\n` +
+                           `${jsonRes['url']} at ${projectInfo["name"]}\n` +
+                           `Type:${jsonRes['story_type']} Status:${jsonRes['current_state']} Point:${jsonRes['estimate']}`;
+            msg.send(response);
         });
     }
 
