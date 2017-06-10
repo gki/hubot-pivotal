@@ -26,8 +26,6 @@ module.exports = function (robot) {
                     replyProjectsInfo(msg);
                 } else if (route === 'story') {
                     replyStorySummary(msg, msg.match[1]);
-                } else if (route === 'project_name') {
-                    replyProjectName(msg, msg.match[1]);
                 } else if (route === 'add_project') {
                     addProject(msg, msg.match[1]);
                 } else if (route === 'remove_project') {
@@ -53,24 +51,6 @@ module.exports = function (robot) {
         }
         msg.send("Here you are!");
         msg.send(response);
-    }
-
-    function replyProjectName(msg, projectId) {
-        let name = "Unknown"
-        robot.http(PIVOTAL_API_BASE_URL + projectId)
-        .header('X-TrackerToken', process.env.HUBOT_PIVOTAL_TOKEN)
-        .timeout(3000)
-        .get()(function(err, resp, body) {
-            if (err) {
-                msg.send(`Could not get project name for id ${projectId} due to err response.`)
-                return;
-            }
-            let jsonRes = JSON.parse(body);
-            if (jsonRes['name']) {
-                name = jsonRes['name'];
-            }
-            msg.send(name);
-        });
     }
 
     function addProject(msg, projectId) {
