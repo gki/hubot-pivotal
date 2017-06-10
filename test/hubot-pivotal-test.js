@@ -13,6 +13,7 @@ describe("Test for hubot-pivotal.js", function() {
     let backupProjectIds;
     let BRAIN_KEY_PROJECTS = 'projects_info';
     let BRAIN_KEY_USERS    = 'users_info';
+    let BRAIN_KEY_ACCOUNT  = 'account_info';
 
     // initial setup
     before(function(done) {
@@ -352,7 +353,7 @@ describe("Test for hubot-pivotal.js", function() {
         chai.expect(dummyRobot.brain.get(BRAIN_KEY_PROJECTS)).to.be.null;
     });
 
-    it("link pivotal user.", function(done) {
+    it("link pivotal user by name.", function(done) {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
@@ -398,6 +399,12 @@ describe("Test for hubot-pivotal.js", function() {
         dummyRobot.setHttpResponseMock(() => {
             return JSON.stringify(testResponse);
         });
+
+        let testData = {
+            id : "1234567"
+        };
+        dummyRobot.brain.set(BRAIN_KEY_ACCOUNT, testData);
+
         // test
         let reply = dummyRobot.testRun(targetScript,
             "link me with pivotal user Ieyasu Tokugawa",
@@ -409,12 +416,14 @@ describe("Test for hubot-pivotal.js", function() {
                     chai.expect(reply).to.have.string("111");
                     chai.expect(reply).to.have.string("Ieyasu Tokugawa");
 
+                    console.log(reply);
                     // brain
                     let storedUsersInfo = dummyRobot.brain.get(BRAIN_KEY_USERS);
                     chai.expect(storedUsersInfo).to.be.not.null;
-                    chai.expect(storedUsersInfo["chat_id"]).to.equal(dummyRobot.userName);
-                    chai.expect(storedUsersInfo["pv_id"]).to.equal(testResponse[0]["person"]["id"]);
-                    chai.expect(storedUsersInfo["pv_name"]).to.equal(testResponse[0]["person"]["name"]);
+                    chai.expect(storedUsersInfo[dummyRobot.userName]).to.be.not.null;
+                    chai.expect(storedUsersInfo[dummyRobot.userName].pv_id).to.equal(testResponse[0]["person"]["id"]);
+                    chai.expect(storedUsersInfo[dummyRobot.userName].pv_name).to.equal(testResponse[0]["person"]["name"]);
+                    console.log(storedUsersInfo);
                 } catch (err) {
                     done(err);
                     return;
@@ -423,4 +432,19 @@ describe("Test for hubot-pivotal.js", function() {
             });
     });
 
+    it("link pivotal user by initial.", function(done) {
+        fail();
+    });
+
+    it("link pivotal user by username.", function(done) {
+        fail();
+    });
+
+    it("link pivotal user twice.", function(done) {
+        fail();
+    });
+
+    it("link pivotal user by linked user.", function(done) {
+        fail();
+    });
 });
