@@ -12,6 +12,7 @@ describe("Test for hubot-pivotal.js", function() {
 
     let backupProjectIds;
     let BRAIN_KEY_PROJECTS = 'projects_info';
+    let BRAIN_KEY_USERS    = 'users_info';
 
     // initial setup
     before(function(done) {
@@ -350,4 +351,76 @@ describe("Test for hubot-pivotal.js", function() {
         chai.expect(reply).to.have.string("no project info");
         chai.expect(dummyRobot.brain.get(BRAIN_KEY_PROJECTS)).to.be.null;
     });
+
+    it("link pivotal user.", function(done) {
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        let testResponse = [
+            {
+                "id": 111, 
+                "kind": "account_membership", 
+                "person": {
+                    "email": "yasu@tenka.com", 
+                    "id": 111, 
+                    "initials": "IT", 
+                    "kind": "person", 
+                    "name": "Ieyasu Tokugawa", 
+                    "username": "ieyasu"
+                }
+            }, 
+            {
+                "id": 222, 
+                "kind": "account_membership", 
+                "person": {
+                    "email": "hide@tenka.com", 
+                    "id": 222, 
+                    "initials": "HT", 
+                    "kind": "person", 
+                    "name": "Hideyoshi Toyotomi", 
+                    "username": "hideyoshi"
+                }
+            }, 
+            {
+                "id": 333, 
+                "kind": "account_membership", 
+                "person": {
+                    "email": "nobu@tenks.com", 
+                    "id": 333, 
+                    "initials": "NO", 
+                    "kind": "person", 
+                    "name": "Nobunaga Oda", 
+                    "username": "nobunaga"
+                }
+            }
+        ]
+
+        dummyRobot.setHttpResponseMock(() => {
+            return JSON.stringify(testResponse);
+        });
+        // test
+        let reply = dummyRobot.testRun(targetScript,
+            "link me with pivotal user Ieyasu Tokugawa",
+            function (reply) {
+                // check
+                try {
+                    // response
+                    chai.expect(reply).to.have.string("Done");
+                    chai.expect(reply).to.have.string("111");
+                    chai.expect(reply).to.have.string("Ieyasu Tokugawa");
+
+                    // brain
+                    let storedUsersInfo = dummyRobot.brain.get(BRAIN_KEY_USERS);
+                    chai.expect(storedUsersInfo).to.be.not.null;
+                    chai.expect(storedUsersInfo["chat_id"]).to.equal(dummyRobot.userName);
+                    chai.expect(storedUsersInfo["pv_id"]).to.equal(testResponse[0]["person"]["id"]);
+                    chai.expect(storedUsersInfo["pv_name"]).to.equal(testResponse[0]["person"]["name"]);
+                } catch (err) {
+                    done(err);
+                    return;
+                }
+                done();
+            });
+    });
+
 });
