@@ -337,4 +337,17 @@ describe("Test for hubot-pivotal.js", function() {
         chai.expect(remainingData).to.be.not.null;
         chai.expect(remainingData["1111"]).to.be.not.null;
     });
+
+    it("remove project w/ empty brain.", function() {
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        // test
+        let reply = dummyRobot.testRun(targetScript, "remove pivotal project #1111");
+
+        // check
+        chai.expect(spyRespond.called).to.be.ok;
+        chai.expect(reply).to.have.string("no project info");
+        chai.expect(dummyRobot.brain.get(BRAIN_KEY_PROJECTS)).to.be.null;
+    });
 });
