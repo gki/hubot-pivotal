@@ -6,15 +6,30 @@
 # hubot-pivotal
 hubot plugin for pivotal tracker
 
-**TBD** Full documentation 
-
 ## Installation
+In your hubot project, run
+```
+$ npm install --save hubot-pivotal
+```
+Then, add `hubot-pivotal` to your `external-scripts.json`:
+```
+[
+  ...,
+  "hubot-pivotal"
+]
+```
 
-**TBD**
+#### Note: Please use permanent hubot brain.
+
+This plugin stores data to brain. So, use a permanent solution for the hubot brain like Redis, Mongo etc...
 
 ## Configuration
-
-**TBD**
+Environmental variables
+```
+HUBOT_PIVOTAL_TOKEN    : Access token for your pivotal projects.
+                         If you want to allow your hubot to access multiple projects,
+                         make sure this token has proper permission.
+```
 
 ## Sample
 ```

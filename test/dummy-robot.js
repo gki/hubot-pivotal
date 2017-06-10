@@ -91,7 +91,7 @@ class DummyRobot {
                 // do nothing console.log('called seve.')
             },
             remove: (key) => {
-                delete brainData[key];
+                delete this.brainData[key];
             },
         }
     }
