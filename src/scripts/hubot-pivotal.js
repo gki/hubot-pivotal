@@ -22,11 +22,6 @@ module.exports = function (robot) {
         return function(msg) {
             // console.log("route=" + route);
             try {
-                if (route === "hello") {
-                    msg.send("world!");
-                    return;
-                }
-
                 if (route === 'show_projects') {
                     replyProjectsInfo(msg);
                 } else if (route === 'story') {
