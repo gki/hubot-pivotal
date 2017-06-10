@@ -54,10 +54,8 @@ module.exports = function (robot) {
     }
 
     function addProject(msg, projectId) {
-        let name = "Unknown"
-        robot.http(PIVOTAL_API_BASE_URL + projectId)
-        .header('X-TrackerToken', process.env.HUBOT_PIVOTAL_TOKEN)
-        .timeout(3000)
+        let name = "Unknown";
+        _createHttpClient(projectId)
         .get()(function(err, resp, body) {
             if (err) {
                 msg.send(`Could not add project for id ${projectId} due to err response.`)
@@ -133,16 +131,17 @@ module.exports = function (robot) {
     }
 
     function _replyStorySummary(msg, projectInfo, storyId) {
-        robot.http(PIVOTAL_API_BASE_URL
-            + projectInfo["id"]
+        _createHttpClient(projectInfo["id"]
             + "/stories"
             + "/" + storyId)
-        .header('X-TrackerToken', process.env.HUBOT_PIVOTAL_TOKEN)
-        .timeout(3000)
         .get()(function(err, resp, body) {
+            if (err) {
+                msg.send(`Could not get ticket info for story id ${storyId} of project id ${projectInfo["id"]} due to err response.`)
+                return;
+            }
             let jsonRes = JSON.parse(body);
             if (jsonRes['code'] === "unfound_resource") {
-                console.log("Could not fide any ticket for #" + storyId + " in " + projectInfo["name"]);
+                console.log("Could not find any ticket for #" + storyId + " in " + projectInfo["name"]);
             } else {
                     let response = `#${jsonRes['id']} ${jsonRes['name']}\n` +
                                    `${jsonRes['url']} at ${projectInfo["name"]}\n` +
@@ -150,6 +149,12 @@ module.exports = function (robot) {
                     msg.send(response);
             }
         });
+    }
+
+    function _createHttpClient(pathAfterBaseUrl) {
+        return robot.http(PIVOTAL_API_BASE_URL + pathAfterBaseUrl)
+            .header('X-TrackerToken', process.env.HUBOT_PIVOTAL_TOKEN)
+            .timeout(3000);
     }
 
     function error(e, msg) {
