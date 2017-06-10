@@ -4,9 +4,6 @@ var pad = require('pad');
 
 module.exports = function (robot) {
     var RESPONSE_TO_ERROR = 'An error occurred. %{message}';
-    if (process.env.PROJECT_IDS) {
-        var PROJECT_IDS = process.env.PROJECT_IDS.split(',');
-    }
     var PIVOTAL_API_BASE_URL = 'https://www.pivotaltracker.com/services/v5/projects/'
     var PIVOTAL_WEB_BASE_URL = 'https://www.pivotaltracker.com/n/projects/'
     var PIVOTAL_API_FEILDS = '&fields=name,url,name,story_type,estimate,created_at,current_state,owner_ids'
@@ -17,13 +14,9 @@ module.exports = function (robot) {
 
     robot.respond(/show pivotal projects/i, messageHandling('show_projects'));
     
-    // robot.respond(/show pivotal project name for #(\d+).*$/i, messageHandling('project_name'));
-
     robot.respond(/add pivotal project #(\d+).*$/i, messageHandling('add_project'));
 
     robot.respond(/remove pivotal project #(\d+).*$/i, messageHandling('remove_project'));
-
-    // robot.respond(/hello/i, messageHandling("hello"));
 
     function messageHandling(route) {
         return function(msg) {
@@ -34,14 +27,8 @@ module.exports = function (robot) {
                     return;
                 }
 
-                // if (!PROJECT_IDS || PROJECT_IDS.length == 0) {
-                //     msg.send("No project ids are registered. :(");
-                //     return;
-                // }
-
                 if (route === 'show_projects') {
                     replyProjectsInfo(msg);
-                    // msg.send(getPivotalUrls());
                 } else if (route === 'story') {
                     replyStorySummary(msg, msg.match[1]);
                 } else if (route === 'project_name') {
@@ -55,14 +42,6 @@ module.exports = function (robot) {
                 error(e, msg);
             }
         };
-    }
-
-    function getPivotalUrls() {
-        let response = "";
-        for (let index in PROJECT_IDS) {
-            response += " " + PIVOTAL_WEB_BASE_URL + PROJECT_IDS[index] + "\n";
-        }
-        return response;
     }
 
     function replyProjectsInfo(msg) {
