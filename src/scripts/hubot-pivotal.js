@@ -29,7 +29,7 @@ module.exports = function (robot) {
         return function(msg) {
             // console.log("route=" + route);
             try {
-                if (route == "hello") {
+                if (route === "hello") {
                     msg.send("world!");
                     return;
                 }
@@ -39,31 +39,31 @@ module.exports = function (robot) {
                 //     return;
                 // }
 
-                if (route == 'show_projects') {
+                if (route === 'show_projects') {
                     replyProjectsInfo(msg);
                     // msg.send(getPivotalUrls());
-                } else if (route == 'story') {
+                } else if (route === 'story') {
                     replyStorySummary(msg, msg.match[1]);
-                } else if (route == 'project_name') {
+                } else if (route === 'project_name') {
                     replyProjectName(msg, msg.match[1]);
-                } else if (route == 'add_project') {
+                } else if (route === 'add_project') {
                     addProject(msg, msg.match[1]);
-                } else if (route == 'remove_project') {
+                } else if (route === 'remove_project') {
                     removeProject(msg, msg.match[1]);
                 }
             } catch (e) {
                 error(e, msg);
             }
         };
-    };
+    }
 
     function getPivotalUrls() {
         let response = "";
         for (let index in PROJECT_IDS) {
             response += " " + PIVOTAL_WEB_BASE_URL + PROJECT_IDS[index] + "\n";
-        };
+        }
         return response;
-    };
+    }
 
     function replyProjectsInfo(msg) {
         let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
@@ -201,5 +201,5 @@ module.exports = function (robot) {
     function error(e, msg) {
         let response = RESPONSE_TO_ERROR.replace(/%\{message\}/, e.message);
         msg.send(response);
-    };
+    }
 };
