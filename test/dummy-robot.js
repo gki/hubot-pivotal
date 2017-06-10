@@ -12,6 +12,7 @@ class DummyRobot {
         this.httpResponseMock = null;
         this.httpErrorMock = null;
         this.brainData = {_private: {}}
+        this.userName = "taro"
 
         this.respond = (regix, callback) => {
             if (regix.test(this.inputMessage)) {
@@ -20,6 +21,11 @@ class DummyRobot {
                     text: this.inputMessage,
                     send: this.captureSend,
                     emit: this.captureEmit,
+                    message : {
+                        user : {
+                            name: this.userName
+                        }
+                    }
                 }
                 callback(msg);
             }
