@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/hubot-pivotal.svg)](https://badge.fury.io/js/hubot-pivotal)
+
 [![Build Status](https://travis-ci.org/gki/hubot-pivotal.svg?branch=master)](https://travis-ci.org/gki/hubot-pivotal)
 [![Dependency Status](https://gemnasium.com/badges/github.com/gki/hubot-pivotal.svg)](https://gemnasium.com/github.com/gki/hubot-pivotal)
 [![Code Climate](https://codeclimate.com/github/gki/hubot-pivotal/badges/gpa.svg)](https://codeclimate.com/github/gki/hubot-pivotal)
