@@ -521,6 +521,19 @@ describe("Test for hubot-pivotal.js", function() {
     it("link pivotal user by linked user.", function(done) {
         fail();
     });
+
+    it("link pivotal user by unknown user.", function(done) {
+        fail();
+    });
+
+    it("link pivotal user fail.", function(done) {
+        fail();
+    });
+
+    it("link pivotal user w/ empty account info.", function(done) {
+        fail();
+    });
+
 });
 
 function _createTestResponseForLinkUser() {
