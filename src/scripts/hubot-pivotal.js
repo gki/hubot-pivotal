@@ -136,8 +136,14 @@ module.exports = function (robot) {
             return;
         }
 
-        // todo return error if already this user is linked.
         let chatUSerId = msg.message.user.name;
+        let usersInfo = robot.brain.get(BRAIN_KEY_USERS);
+        if (usersInfo && usersInfo[chatUSerId]) {
+            // return error if already this user is linked.
+            msg.send(`You've already linked as ${usersInfo[chatUSerId].pv_name}. If want to change link, do unlink at first.`)
+            return;
+        }
+
 
         _createHttpClient(`accounts/${accountInfo["id"]}/memberships`)
         .get()(function(err, resp, body) {
