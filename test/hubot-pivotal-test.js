@@ -519,7 +519,48 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     it("link pivotal user by linked user.", function(done) {
-        fail();
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        let testResponse = _createTestResponseForLinkUser();
+        dummyRobot.setHttpResponseMock(() => {
+            return JSON.stringify(testResponse);
+        });
+
+        let testData = {
+            id : "1234567"
+        };
+        dummyRobot.brain.set(BRAIN_KEY_ACCOUNT, testData);
+        let registeredData = {};
+        registeredData[dummyRobot.userName] = {
+            pv_id   : "999",
+            pv_name : "Masamune Date"
+        };
+        dummyRobot.brain.set(BRAIN_KEY_USERS, registeredData);
+
+        // test
+        dummyRobot.testRun(targetScript,
+            "link me with pivotal user Ieyasu Tokugawa",
+            function (reply) {
+                // check
+                try {
+                    // response
+                    chai.expect(reply).to.not.have.string("Done");
+
+                    // brain
+                    let storedUsersInfo = dummyRobot.brain.get(BRAIN_KEY_USERS);
+                    chai.expect(storedUsersInfo).to.be.not.null;
+                    let userData = storedUsersInfo[dummyRobot.userName];
+                    chai.expect(userData).to.be.not.null;
+                    // Should keep original data
+                    chai.expect(userData.pv_id).to.equal(registeredData[dummyRobot.userName].pv_id);
+                    chai.expect(userData.pv_name).to.equal(registeredData[dummyRobot.userName].pv_name);
+                } catch (err) {
+                    done(err);
+                    return;
+                }
+                done();
+            });
     });
 
     it("link pivotal user by unknown user.", function(done) {
