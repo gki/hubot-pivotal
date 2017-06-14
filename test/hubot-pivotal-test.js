@@ -598,7 +598,36 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     it("link pivotal user fail.", function(done) {
-        fail();
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        dummyRobot.setHttpErrorMock(() => {
+            return new Error('dummy errro.');
+        });
+        
+        let testData = {
+            id : "1234567"
+        };
+        dummyRobot.brain.set(BRAIN_KEY_ACCOUNT, testData);
+
+        // test
+        let reply = dummyRobot.testRun(targetScript,
+            "link me with pivotal user Ieyasu Tokugawa",
+            function (reply) {
+                // check
+                try {
+                    // response
+                    chai.expect(reply).to.have.string("An error occurred during get pivotal member info");
+
+                    // brain
+                    let storedUsersInfo = dummyRobot.brain.get(BRAIN_KEY_USERS);
+                    chai.expect(storedUsersInfo).to.be.null;
+                } catch (err) {
+                    done(err);
+                    return;
+                }
+                done();
+            });
     });
 
     it("link pivotal user w/ empty account info.", function(done) {
