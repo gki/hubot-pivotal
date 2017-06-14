@@ -564,7 +564,37 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     it("link pivotal user by unknown user.", function(done) {
-        fail();
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        let testResponse = _createTestResponseForLinkUser();
+        dummyRobot.setHttpResponseMock(() => {
+            return JSON.stringify(testResponse);
+        });
+
+        let testData = {
+            id : "1234567"
+        };
+        dummyRobot.brain.set(BRAIN_KEY_ACCOUNT, testData);
+
+        // test
+        let reply = dummyRobot.testRun(targetScript,
+            "link me with pivotal user Matthew Calbraith Perry",
+            function (reply) {
+                // check
+                try {
+                    // response
+                    chai.expect(reply).to.have.string("Could not find");
+
+                    // brain
+                    let storedUsersInfo = dummyRobot.brain.get(BRAIN_KEY_USERS);
+                    chai.expect(storedUsersInfo).to.be.null;
+                } catch (err) {
+                    done(err);
+                    return;
+                }
+                done();
+            });
     });
 
     it("link pivotal user fail.", function(done) {
