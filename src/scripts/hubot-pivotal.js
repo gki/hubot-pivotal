@@ -268,11 +268,21 @@ module.exports = function (robot) {
                 return;
             }
 
-            let response = `#${jsonRes['id']} ${jsonRes['name']}\n` +
-                           `${jsonRes['url']} at ${projectInfo["name"]}\n` +
-                           `Type:${jsonRes['story_type']} Status:${jsonRes['current_state']} Point:${jsonRes['estimate']}`;
-            msg.send(response);
+            msg.send(_createStorySummary(jsonRes));
         });
+    }
+
+    function _createStorySummary(storyJson) {
+        let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
+        let projectName = projectsInfo[storyJson.project_id];
+        if (!projectName) {
+            projectName = `Unknown(${storyJson.project_id})`;
+        }
+
+        let response = `#${storyJson['id']} ${storyJson['name']}\n` +
+                       `${storyJson['url']} at ${projectName}\n` +
+                       `Type:${storyJson['story_type']} Status:${storyJson['current_state']} Point:${storyJson['estimate']}`;
+        return response;
     }
 
     function _createProjectApiClient(pathAfterBaseUrl) {
