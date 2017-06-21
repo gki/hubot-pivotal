@@ -22,6 +22,7 @@ module.exports = function (robot) {
 
     robot.respond(/link me with pivotal user (.*)$/i, messageHandling('link_user'));
 
+    robot.respond(/unlink me from pivotal user/i, messageHandling('unlink_user'));
 
     function messageHandling(route) {
         return function(msg) {
@@ -37,6 +38,8 @@ module.exports = function (robot) {
                     removeProject(msg, msg.match[1]);
                 } else if (route === 'link_user') {
                     linkUser(msg, msg.match[1])
+                } else if (route === 'unlink_user') {
+                    unlinkUser(msg);
                 }
             } catch (e) {
                 error(e, msg);
@@ -180,6 +183,24 @@ module.exports = function (robot) {
         };
         robot.brain.set(BRAIN_KEY_USERS, usersInfo);
         robot.brain.save();
+    }
+
+    function unlinkUser(msg) {
+        let usersInfo = robot.brain.get(BRAIN_KEY_USERS);
+        if (!usersInfo || !usersInfo[msg.message.user.name]) {
+            msg.send("There is no liked pivotal user in my brain. You seem to already unlinked.");
+            return;
+        }
+
+        delete usersInfo[msg.message.user.name];
+        if (Object.keys(usersInfo).length > 0) {
+            robot.brain.set(BRAIN_KEY_USERS, usersInfo);
+        } else {
+            // removed all info.
+            robot.brain.remove(BRAIN_KEY_USERS);
+        }
+        robot.brain.save();
+        msg.send("Done. I've removed your linked pivotal user from my brain.");
     }
 
     function _setupAccountInfo(msg, completionCallback) {
