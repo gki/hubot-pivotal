@@ -228,6 +228,16 @@ module.exports = function (robot) {
         });
     }
 
+    function replyOwnTickets(msg) {
+        // check user info from brain
+
+        // check project info from brain
+
+        // get all tickets from all projects.
+        // https://www.pivotaltracker.com/services/v5/projects/1960417/search?query=owner%3A1827588+AND+includedone%3Afalse
+
+    }
+
     function replyStorySummary(msg, storyId) {
         let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
         if (!projectsInfo) {
@@ -274,7 +284,7 @@ module.exports = function (robot) {
     }
 
     function _createApiClient(api, pathAfterBaseUrl) {
-        if (pathAfterBaseUrl === null) {
+        if (!pathAfterBaseUrl) {
             pathAfterBaseUrl = "";
         }
         return robot.http(PIVOTAL_API_BASE_URL + api + pathAfterBaseUrl)
