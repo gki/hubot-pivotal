@@ -274,7 +274,7 @@ module.exports = function (robot) {
     }
 
     function _createApiClient(api, pathAfterBaseUrl) {
-        if (pathAfterBaseUrl == null) {
+        if (pathAfterBaseUrl === null) {
             pathAfterBaseUrl = "";
         }
         return robot.http(PIVOTAL_API_BASE_URL + api + pathAfterBaseUrl)
@@ -283,7 +283,7 @@ module.exports = function (robot) {
     }
 
     function _isPivotalApiError(jsonRes) {
-        return jsonRes['code'] === "unfound_resource" || jsonRes['code'] == "route_not_found";
+        return jsonRes['code'] === "unfound_resource" || jsonRes['code'] === "route_not_found";
     }
 
     function error(e, msg) {
