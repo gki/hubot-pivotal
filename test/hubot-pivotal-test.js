@@ -737,6 +737,23 @@ describe("Test for hubot-pivotal.js", function() {
             });
     });
 
+    it ("show user's all tickets.", function(done) {
+
+    });
+
+    it ("show user's all tickets (there is no user's ticket)", function(done) {
+        fail();
+    });
+    
+    it ("show user's all tickets w/o user info.", function(done) {
+        fail();
+    });
+
+    it ("show user's all tickets w/o project info.", function(done) {
+        fail();
+    });
+
+
 });
 
 function _createTestResponseForLinkUser() {
