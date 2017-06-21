@@ -9,9 +9,10 @@ class DummyRobot {
         this.mockResponseCallback = null;
         this.capturedCallback = null;
         this.globalHttpOptions = {};
-        this.httpResponseMock = null;
-        this.httpErrorMock = null;
+        this.httpMockResponses = [];
+        this.httpMockErrors = [];
         this.brainData = {_private: {}}
+        this.userName = "taro"
 
         this.respond = (regix, callback) => {
             if (regix.test(this.inputMessage)) {
@@ -20,6 +21,11 @@ class DummyRobot {
                     text: this.inputMessage,
                     send: this.captureSend,
                     emit: this.captureEmit,
+                    message : {
+                        user : {
+                            name: this.userName
+                        }
+                    }
                 }
                 callback(msg);
             }
@@ -53,7 +59,7 @@ class DummyRobot {
 
         this.http = (url, options) => {
             let client = HttpClient.create(url).header('User-Agent', "Hubot/" + this.version);
-            if (this.httpResponseMock || this.httpErrorMock) {
+            if (this.httpMockResponses.length > 0 || this.httpMockErrors.length > 0) {
                 // console.log(`Mocked get() and post().`)
                 client.get = this._responseMock;
                 client.post = this._responseMock;
@@ -61,19 +67,19 @@ class DummyRobot {
             return client;
         };
 
-        this.setHttpResponseMock = (callbackMock) => {
-            this.httpResponseMock = callbackMock;
+        this.addHttpMockResponse = (callbackMock) => {
+            this.httpMockResponses.push(callbackMock);
         }
 
-        this.setHttpErrorMock = (callbackMock) => {
-            this.httpErrorMock = callbackMock;
+        this.addHttpMockError = (callbackMock) => {
+            this.httpMockErrors.push(callbackMock);
         }
 
         this._responseMock = () => {
             return (function(_this) {
                 return function(callback) {
-                    let body = _this.httpResponseMock ? _this.httpResponseMock() : null;
-                    let err = _this.httpErrorMock ? _this.httpErrorMock() : null;
+                    let body = _this.httpMockResponses.length > 0 ? _this.httpMockResponses.shift()() : null;
+                    let err = _this.httpMockErrors.length > 0 ? _this.httpMockErrors.shift()() : null;
                     callback(err, null, body);
                     return _this;
                 };

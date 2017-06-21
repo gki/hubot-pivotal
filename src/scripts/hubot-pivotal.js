@@ -9,6 +9,8 @@ module.exports = function (robot) {
     var PIVOTAL_API_FEILDS = '&fields=name,url,name,story_type,estimate,created_at,current_state,owner_ids'
 
     var BRAIN_KEY_PROJECTS = 'projects_info';
+    var BRAIN_KEY_USERS    = 'users_info';
+    var BRAIN_KEY_ACCOUNT  = 'account_info';
 
     robot.hear(/^.*?\b(?:pivotal|pv)#(\d+)\b.*$/i, messageHandling('story'));
 
@@ -17,6 +19,10 @@ module.exports = function (robot) {
     robot.respond(/add pivotal project #(\d+).*$/i, messageHandling('add_project'));
 
     robot.respond(/remove pivotal project #(\d+).*$/i, messageHandling('remove_project'));
+
+    robot.respond(/link me with pivotal user (.*)$/i, messageHandling('link_user'));
+
+    robot.respond(/unlink me from pivotal user/i, messageHandling('unlink_user'));
 
     function messageHandling(route) {
         return function(msg) {
@@ -30,6 +36,10 @@ module.exports = function (robot) {
                     addProject(msg, msg.match[1]);
                 } else if (route === 'remove_project') {
                     removeProject(msg, msg.match[1]);
+                } else if (route === 'link_user') {
+                    linkUser(msg, msg.match[1])
+                } else if (route === 'unlink_user') {
+                    unlinkUser(msg);
                 }
             } catch (e) {
                 error(e, msg);
@@ -85,6 +95,7 @@ module.exports = function (robot) {
                 };
 
             robot.brain.set(BRAIN_KEY_PROJECTS, projectsInfo);
+            robot.brain.save();
             if (isProjectInfoExist) {
                 msg.send(`OK! I've updated project "${name}" for #${projectId} with the latest info.`);
             } else {
@@ -107,15 +118,110 @@ module.exports = function (robot) {
         }
 
         let name = targetInfo['name'];
-        delete projectsInfo[projectId];
-        if (Object.keys(projectsInfo).length > 0) {
-            robot.brain.set(BRAIN_KEY_PROJECTS, projectsInfo);
+        _removeAndSaveToBrain(projectsInfo, projectId, BRAIN_KEY_PROJECTS);
+        msg.send(`Done. Project ${name} (#${projectId}) has been deleted from my brain.`);
+    }
+
+    function linkUser(msg, pivotalUserInfo) {
+        let accountInfo = robot.brain.get(BRAIN_KEY_ACCOUNT);
+        if (!accountInfo) {
+            _setupAccountInfo(msg, function () {
+                // call self again after it completes account info setup.
+                linkUser(msg, pivotalUserInfo);
+            });
+            return;
+        }
+
+        let chatUSerId = msg.message.user.name;
+        let usersInfo = robot.brain.get(BRAIN_KEY_USERS);
+        if (usersInfo && usersInfo[chatUSerId]) {
+            // return error if already this user is linked.
+            msg.send(`You've already linked as ${usersInfo[chatUSerId].pv_name}. If want to change link, do unlink at first.`)
+            return;
+        }
+
+
+        _createHttpClient(`accounts/${accountInfo["id"]}/memberships`)
+        .get()(function(err, resp, body) {
+            if (err) {
+                msg.send(`An error occurred during get pivotal member info. Check network or Pivotal Tracker status.`);
+                return;
+            }
+
+            let jsonRes = JSON.parse(body);
+            if (jsonRes['code'] === "unfound_resource") {
+                console.log("Could not get member info for pivotal account. Check members are there in Pivotal Tracker.");
+                return;
+            }
+
+            for (let index in jsonRes) {
+                let person = jsonRes[index].person;
+                if (person.name === pivotalUserInfo || person.initials === pivotalUserInfo || person.username === pivotalUserInfo) {
+                    _addUserInfo(msg, person);
+                    msg.send(`Done. Linked you as a pivotal user: ${person.name} (id:${person.id})`);
+                    return;
+                }
+            }
+
+            msg.send("Could not find any member who has information `" + pivotalUserInfo + "`.");
+        });
+    }
+
+    function _addUserInfo(msg, person) {
+        let usersInfo = robot.brain.get(BRAIN_KEY_USERS);
+        usersInfo = usersInfo ? usersInfo : {};
+        usersInfo[msg.message.user.name] = {
+            pv_id   : person.id,
+            pv_name : person.name
+        };
+        robot.brain.set(BRAIN_KEY_USERS, usersInfo);
+        robot.brain.save();
+    }
+
+    function unlinkUser(msg) {
+        let usersInfo = robot.brain.get(BRAIN_KEY_USERS);
+        if (!usersInfo || !usersInfo[msg.message.user.name]) {
+            msg.send("There is no liked pivotal user in my brain. You seem to already unlinked.");
+            return;
+        }
+
+        _removeAndSaveToBrain(usersInfo, msg.message.user.name, BRAIN_KEY_USERS)
+        msg.send("Done. I've removed your linked pivotal user from my brain.");
+    }
+
+    function _removeAndSaveToBrain(target, key, brainKey) {
+        delete target[key];
+        if (Object.keys(target).length > 0) {
+            robot.brain.set(brainKey, target);
         } else {
             // removed all info.
-            robot.brain.remove(BRAIN_KEY_PROJECTS);
+            robot.brain.remove(brainKey);
         }
         robot.brain.save();
-        msg.send(`Done. Project ${name} (#${projectId}) has been deleted from my brain.`);
+    }
+
+    function _setupAccountInfo(msg, completionCallback) {
+        _createHttpClient("accounts")
+        .get()(function(err, resp, body) {
+            if (err) {
+                msg.send(`An error occurred during setting up account info. Check network or Pivotal Tracker status.`);
+                return;
+            }
+            
+            let jsonRes = JSON.parse(body);
+            if (jsonRes['code'] === "unfound_resource") {
+                console.log("Could not get account info for your pivotal token. Check environment parameter HUBOT_PIVOTAL_TOKEN.");
+                return;
+            }
+
+            let accountInfo = {
+                id: jsonRes["id"]
+            };
+
+            robot.brain.set(BRAIN_KEY_ACCOUNT, accountInfo);
+            robot.brain.save()
+            completionCallback();
+        });
     }
 
     function replyStorySummary(msg, storyId) {
