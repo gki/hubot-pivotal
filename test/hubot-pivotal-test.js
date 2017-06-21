@@ -121,7 +121,7 @@ describe("Test for hubot-pivotal.js", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
-        dummyRobot.setHttpResponseMock(() => {
+        dummyRobot.addHttpMockResponse(() => {
             // no "name" in response Json.
             return '{"foo":"bar"}';
         });
@@ -148,7 +148,7 @@ describe("Test for hubot-pivotal.js", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
-        dummyRobot.setHttpResponseMock(() => {
+        dummyRobot.addHttpMockResponse(() => {
             return '{"name":"My Project", "description":"Hello!"}';
         });
 
@@ -179,7 +179,7 @@ describe("Test for hubot-pivotal.js", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
-        dummyRobot.setHttpErrorMock(() => {
+        dummyRobot.addHttpMockError(() => {
             return new Error('dummy errro.');
         });
 
@@ -219,7 +219,7 @@ describe("Test for hubot-pivotal.js", function() {
             labels: []
         }
 
-        dummyRobot.setHttpResponseMock(() => {
+        dummyRobot.addHttpMockResponse(() => {
             return JSON.stringify(testResponse);
         });
 
@@ -270,7 +270,7 @@ describe("Test for hubot-pivotal.js", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
-        dummyRobot.setHttpResponseMock(() => {
+        dummyRobot.addHttpMockResponse(() => {
             return '{"code": "unfound_resource"}';
         });
 
@@ -358,7 +358,7 @@ describe("Test for hubot-pivotal.js", function() {
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
         let testResponse = _createTestResponseForLinkUser();
-        dummyRobot.setHttpResponseMock(() => {
+        dummyRobot.addHttpMockResponse(() => {
             return JSON.stringify(testResponse);
         });
 
@@ -398,7 +398,7 @@ describe("Test for hubot-pivotal.js", function() {
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
         let testResponse = _createTestResponseForLinkUser();
-        dummyRobot.setHttpResponseMock(() => {
+        dummyRobot.addHttpMockResponse(() => {
             return JSON.stringify(testResponse);
         });
 
@@ -438,7 +438,7 @@ describe("Test for hubot-pivotal.js", function() {
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
         let testResponse = _createTestResponseForLinkUser();
-        dummyRobot.setHttpResponseMock(() => {
+        dummyRobot.addHttpMockResponse(() => {
             return JSON.stringify(testResponse);
         });
 
@@ -478,7 +478,7 @@ describe("Test for hubot-pivotal.js", function() {
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
         let testResponse = _createTestResponseForLinkUser();
-        dummyRobot.setHttpResponseMock(() => {
+        dummyRobot.addHttpMockResponse(() => {
             return JSON.stringify(testResponse);
         });
 
@@ -523,7 +523,7 @@ describe("Test for hubot-pivotal.js", function() {
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
         let testResponse = _createTestResponseForLinkUser();
-        dummyRobot.setHttpResponseMock(() => {
+        dummyRobot.addHttpMockResponse(() => {
             return JSON.stringify(testResponse);
         });
 
@@ -568,7 +568,7 @@ describe("Test for hubot-pivotal.js", function() {
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
         let testResponse = _createTestResponseForLinkUser();
-        dummyRobot.setHttpResponseMock(() => {
+        dummyRobot.addHttpMockResponse(() => {
             return JSON.stringify(testResponse);
         });
 
@@ -601,7 +601,7 @@ describe("Test for hubot-pivotal.js", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
-        dummyRobot.setHttpErrorMock(() => {
+        dummyRobot.addHttpMockError(() => {
             return new Error('dummy errro.');
         });
         
@@ -636,8 +636,8 @@ describe("Test for hubot-pivotal.js", function() {
         // let spyLinkUser = sinon.spy(targetScript, "linkUser");
 
         let testResponse = {id: 7777777};
-        dummyRobot.setHttpResponseMock(() => {
-            this.dommyRobort.setHttpResponseMock(() => {
+        dummyRobot.addHttpMockResponse(() => {
+            this.dommyRobort.addHttpMockResponse(() => {
                 return JSON.stringify(this._createTestResponseForLinkUser());
             });
             return JSON.stringify(testResponse);
