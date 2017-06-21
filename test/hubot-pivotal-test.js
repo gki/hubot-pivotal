@@ -657,7 +657,7 @@ describe("Test for hubot-pivotal.js", function() {
                 // check
                 try {
                     // response
-                    chai.expect(reply).to.not.have.string("Done");
+                    chai.expect(reply).to.have.string("Done");
                     // brain
                     let storedAccountInfo = dummyRobot.brain.get(BRAIN_KEY_ACCOUNT);
                     chai.expect(storedAccountInfo).to.be.not.null;
