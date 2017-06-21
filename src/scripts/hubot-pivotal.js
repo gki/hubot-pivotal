@@ -4,7 +4,9 @@ var pad = require('pad');
 
 module.exports = function (robot) {
     var RESPONSE_TO_ERROR = 'An error occurred. %{message}';
-    var PIVOTAL_API_BASE_URL = 'https://www.pivotaltracker.com/services/v5/projects/'
+    var PIVOTAL_API_BASE_URL = 'https://www.pivotaltracker.com/services/v5/'
+    var PIVOTAL_API_PROJECTS = 'projects/'
+    var PIVOTAL_API_ACCOUNTS = 'accounts/'
     var PIVOTAL_WEB_BASE_URL = 'https://www.pivotaltracker.com/n/projects/'
     var PIVOTAL_API_FEILDS = '&fields=name,url,name,story_type,estimate,created_at,current_state,owner_ids'
 
@@ -65,7 +67,7 @@ module.exports = function (robot) {
 
     function addProject(msg, projectId) {
         let name = "Unknown";
-        _createHttpClient(projectId)
+        _createProjectApiClient(projectId)
         .get()(function(err, resp, body) {
             if (err) {
                 msg.send(`Could not add project for id ${projectId} due to err response.`)
@@ -141,7 +143,7 @@ module.exports = function (robot) {
         }
 
 
-        _createHttpClient(`accounts/${accountInfo["id"]}/memberships`)
+        _createAccountApiClient(`/${accountInfo["id"]}/memberships`)
         .get()(function(err, resp, body) {
             if (err) {
                 msg.send(`An error occurred during get pivotal member info. Check network or Pivotal Tracker status.`);
@@ -149,7 +151,7 @@ module.exports = function (robot) {
             }
 
             let jsonRes = JSON.parse(body);
-            if (jsonRes['code'] === "unfound_resource") {
+            if (_isPivotalApiError(jsonRes)) {
                 console.log("Could not get member info for pivotal account. Check members are there in Pivotal Tracker.");
                 return;
             }
@@ -201,7 +203,7 @@ module.exports = function (robot) {
     }
 
     function _setupAccountInfo(msg, completionCallback) {
-        _createHttpClient("accounts")
+        _createAccountApiClient()
         .get()(function(err, resp, body) {
             if (err) {
                 msg.send(`An error occurred during setting up account info. Check network or Pivotal Tracker status.`);
@@ -209,17 +211,19 @@ module.exports = function (robot) {
             }
             
             let jsonRes = JSON.parse(body);
-            if (jsonRes['code'] === "unfound_resource") {
+            if (_isPivotalApiError(jsonRes)) {
                 console.log("Could not get account info for your pivotal token. Check environment parameter HUBOT_PIVOTAL_TOKEN.");
+                console.log(jsonRes);
                 return;
             }
 
             let accountInfo = {
-                id: jsonRes["id"]
+                id: jsonRes[0].id
             };
 
             robot.brain.set(BRAIN_KEY_ACCOUNT, accountInfo);
             robot.brain.save()
+            console.log("Finished to setup account info.");
             completionCallback();
         });
     }
@@ -237,7 +241,7 @@ module.exports = function (robot) {
     }
 
     function _replyStorySummary(msg, projectInfo, storyId) {
-        _createHttpClient(projectInfo["id"]
+        _createProjectApiClient(projectInfo["id"]
             + "/stories"
             + "/" + storyId)
         .get()(function(err, resp, body) {
@@ -248,7 +252,7 @@ module.exports = function (robot) {
             }
             
             let jsonRes = JSON.parse(body);
-            if (jsonRes['code'] === "unfound_resource") {
+            if (_isPivotalApiError(jsonRes)) {
                 // no need to reply
                 console.log("Could not find any ticket for #" + storyId + " in " + projectInfo["name"]);
                 return;
@@ -261,10 +265,25 @@ module.exports = function (robot) {
         });
     }
 
-    function _createHttpClient(pathAfterBaseUrl) {
-        return robot.http(PIVOTAL_API_BASE_URL + pathAfterBaseUrl)
+    function _createProjectApiClient(pathAfterBaseUrl) {
+        return _createApiClient(PIVOTAL_API_PROJECTS, pathAfterBaseUrl);
+    }
+
+    function _createAccountApiClient(pathAfterBaseUrl) {
+        return _createApiClient(PIVOTAL_API_ACCOUNTS, pathAfterBaseUrl);
+    }
+
+    function _createApiClient(api, pathAfterBaseUrl) {
+        if (pathAfterBaseUrl === null) {
+            pathAfterBaseUrl = "";
+        }
+        return robot.http(PIVOTAL_API_BASE_URL + api + pathAfterBaseUrl)
             .header('X-TrackerToken', process.env.HUBOT_PIVOTAL_TOKEN)
             .timeout(3000);
+    }
+
+    function _isPivotalApiError(jsonRes) {
+        return jsonRes['code'] === "unfound_resource" || jsonRes['code'] === "route_not_found";
     }
 
     function error(e, msg) {
