@@ -670,6 +670,73 @@ describe("Test for hubot-pivotal.js", function() {
             });
     });
 
+    it ("unlink pivotal user by linked user.", function(done) {
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        let registeredData = {};
+        registeredData[dummyRobot.userName] = {
+            pv_id   : "111",
+            pv_name : "Ieyasu Tokugawa"
+        };
+        dummyRobot.brain.set(BRAIN_KEY_USERS, registeredData);
+
+        // test
+        dummyRobot.testRun(targetScript,
+            "unlink me from pivotal user",
+            function (reply) {
+                // check
+                try {
+                    // response
+                    chai.expect(reply).to.have.string("Done");
+
+                    // brain
+                    let storedUsersInfo = dummyRobot.brain.get(BRAIN_KEY_USERS);
+                    chai.expect(storedUsersInfo).to.be.null;
+                } catch (err) {
+                    done(err);
+                    return;
+                }
+                done();
+            });
+    });
+
+    it ("unlink pivotal user by not linked user.", function(done) {
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        let registeredData = {};
+        registeredData["Hanako"] = {
+            pv_id   : "111",
+            pv_name : "Ieyasu Tokugawa"
+        };
+        dummyRobot.brain.set(BRAIN_KEY_USERS, registeredData);
+
+        // test
+        dummyRobot.testRun(targetScript,
+            "unlink me from pivotal user",
+            function (reply) {
+                // check
+                try {
+                    // response
+                    chai.expect(reply).to.have.string("already unlinked");
+
+                    // brain
+                    let storedUsersInfo = dummyRobot.brain.get(BRAIN_KEY_USERS);
+                    chai.expect(storedUsersInfo).to.be.not.null;
+                    let userData = storedUsersInfo["Hanako"];
+                    chai.expect(userData).to.be.not.null;
+                    // Should keep original data
+                    chai.expect(userData.pv_id).to.equal(registeredData["Hanako"].pv_id);
+                    chai.expect(userData.pv_name).to.equal(registeredData["Hanako"].pv_name);
+                } catch (err) {
+                    done(err);
+                    return;
+                }
+                done();
+            });
+    });
+
 });
 
 function _createTestResponseForLinkUser() {
