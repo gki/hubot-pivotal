@@ -478,6 +478,11 @@ describe("Test for hubot-pivotal.js", function() {
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
         let testResponse = _createTestResponseForLinkUser();
+        // for 1st response
+        dummyRobot.addHttpMockResponse(() => {
+            return JSON.stringify(testResponse);
+        });
+        // for 2nd response
         dummyRobot.addHttpMockResponse(() => {
             return JSON.stringify(testResponse);
         });
