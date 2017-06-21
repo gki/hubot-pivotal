@@ -203,7 +203,7 @@ module.exports = function (robot) {
     }
 
     function _setupAccountInfo(msg, completionCallback) {
-        _createProjectApiClient("accounts")
+        _createAccountApiClient()
         .get()(function(err, resp, body) {
             if (err) {
                 msg.send(`An error occurred during setting up account info. Check network or Pivotal Tracker status.`);
@@ -211,18 +211,19 @@ module.exports = function (robot) {
             }
             
             let jsonRes = JSON.parse(body);
-            if (jsonRes['code'] === "unfound_resource") {
+            if (_isPivotalApiError(jsonRes)) {
                 console.log("Could not get account info for your pivotal token. Check environment parameter HUBOT_PIVOTAL_TOKEN.");
                 console.log(jsonRes);
                 return;
             }
 
             let accountInfo = {
-                id: jsonRes["id"]
+                id: jsonRes[0].id
             };
 
             robot.brain.set(BRAIN_KEY_ACCOUNT, accountInfo);
             robot.brain.save()
+            console.log("Finished to setup account info.");
             completionCallback();
         });
     }
@@ -273,9 +274,16 @@ module.exports = function (robot) {
     }
 
     function _createApiClient(api, pathAfterBaseUrl) {
-        return robot.http(PIVOTAL_API_BASE_URL + pathAfterBaseUrl)
+        if (pathAfterBaseUrl == null) {
+            pathAfterBaseUrl = "";
+        }
+        return robot.http(PIVOTAL_API_BASE_URL + api + pathAfterBaseUrl)
             .header('X-TrackerToken', process.env.HUBOT_PIVOTAL_TOKEN)
             .timeout(3000);
+    }
+
+    function _isPivotalApiError(jsonRes) {
+        return jsonRes['code'] === "unfound_resource" || jsonRes['code'] == "route_not_found";
     }
 
     function error(e, msg) {

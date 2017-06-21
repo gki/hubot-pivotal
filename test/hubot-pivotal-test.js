@@ -639,7 +639,7 @@ describe("Test for hubot-pivotal.js", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
-        let testResponse = {id: 7777777};
+        let testResponse = [{id: 7777777}];
         // for 1st response
         dummyRobot.addHttpMockResponse(() => {
             return JSON.stringify(testResponse);
@@ -661,7 +661,7 @@ describe("Test for hubot-pivotal.js", function() {
                     // brain
                     let storedAccountInfo = dummyRobot.brain.get(BRAIN_KEY_ACCOUNT);
                     chai.expect(storedAccountInfo).to.be.not.null;
-                    chai.expect(storedAccountInfo.id).to.equal(testResponse.id)
+                    chai.expect(storedAccountInfo.id).to.equal(testResponse[0].id)
                 } catch (err) {
                     done(err);
                     return;
