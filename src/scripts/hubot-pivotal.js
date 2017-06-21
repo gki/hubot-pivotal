@@ -118,14 +118,7 @@ module.exports = function (robot) {
         }
 
         let name = targetInfo['name'];
-        delete projectsInfo[projectId];
-        if (Object.keys(projectsInfo).length > 0) {
-            robot.brain.set(BRAIN_KEY_PROJECTS, projectsInfo);
-        } else {
-            // removed all info.
-            robot.brain.remove(BRAIN_KEY_PROJECTS);
-        }
-        robot.brain.save();
+        _removeAndSaveToBrain(projectsInfo, projectId, BRAIN_KEY_PROJECTS);
         msg.send(`Done. Project ${name} (#${projectId}) has been deleted from my brain.`);
     }
 
@@ -192,15 +185,19 @@ module.exports = function (robot) {
             return;
         }
 
-        delete usersInfo[msg.message.user.name];
-        if (Object.keys(usersInfo).length > 0) {
-            robot.brain.set(BRAIN_KEY_USERS, usersInfo);
+        _removeAndSaveToBrain(usersInfo, msg.message.user.name, BRAIN_KEY_USERS)
+        msg.send("Done. I've removed your linked pivotal user from my brain.");
+    }
+
+    function _removeAndSaveToBrain(target, key, brainKey) {
+        delete target[key];
+        if (Object.keys(target).length > 0) {
+            robot.brain.set(brainKey, target);
         } else {
             // removed all info.
-            robot.brain.remove(BRAIN_KEY_USERS);
+            robot.brain.remove(brainKey);
         }
         robot.brain.save();
-        msg.send("Done. I've removed your linked pivotal user from my brain.");
     }
 
     function _setupAccountInfo(msg, completionCallback) {
