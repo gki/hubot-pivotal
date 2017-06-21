@@ -631,7 +631,37 @@ describe("Test for hubot-pivotal.js", function() {
     });
 
     it("link pivotal user w/ empty account info.", function(done) {
-        fail();
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+        // let spyLinkUser = sinon.spy(targetScript, "linkUser");
+
+        let testResponse = {id: 7777777};
+        dummyRobot.setHttpResponseMock(() => {
+            this.dommyRobort.setHttpResponseMock(() => {
+                return JSON.stringify(this._createTestResponseForLinkUser());
+            });
+            return JSON.stringify(testResponse);
+        });
+
+        // test
+        dummyRobot.testRun(targetScript,
+            "link me with pivotal user Ieyasu Tokugawa",
+            function (reply) {
+                // check
+                try {
+                    // linkUser should be called twice.
+                    // chai.expect(spyLinkUser).to.have.been.called.twice;
+                    console.log(reply);
+                    // brain
+                    let storedAccountInfo = dummyRobot.brain.get(BRAIN_KEY_ACCOUNT);
+                    chai.expect(storedAccountInfo).to.be.not.null;
+                    chai.expect(storedAccountInfo.id).to.equal(testResponse.id)
+                } catch (err) {
+                    done(err);
+                    return;
+                }
+                done();
+            });
     });
 
 });
