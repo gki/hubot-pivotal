@@ -223,7 +223,7 @@ module.exports = function (robot) {
 
             robot.brain.set(BRAIN_KEY_ACCOUNT, accountInfo);
             robot.brain.save()
-            console.log("Finished to setup account info.");
+            // console.log("Finished to setup account info.");
             completionCallback();
         });
     }
@@ -241,7 +241,7 @@ module.exports = function (robot) {
     function replyStorySummary(msg, storyId) {
         let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
         if (!projectsInfo) {
-            console.log("Ignore because there is no pivotal projet info in brain.")
+            // console.log("Ignore because there is no pivotal projet info in brain.")
             return;
         }
 
@@ -257,7 +257,7 @@ module.exports = function (robot) {
         .get()(function(err, resp, body) {
             if (err) {
                 // no need to reply
-                console.log(`Could not get ticket info for story id ${storyId} of project id ${projectInfo["id"]} due to err response.`)
+                // console.log(`Could not get ticket info for story id ${storyId} of project id ${projectInfo["id"]} due to err response.`)
                 return;
             }
             
