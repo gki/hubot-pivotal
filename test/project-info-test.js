@@ -1,5 +1,7 @@
 "use strict";
 
+var TestUtil     = require('./test-util');
+var TestConst    = require('./test-const');
 var chai         = require('chai');
 var sinon        = require('sinon');
 chai.use(require('sinon-chai'));
@@ -8,27 +10,17 @@ chai.use(require('chai-string'));
 var DummyRobot   = require('./dummy-robot');
 var targetScript = require("../src/scripts/hubot-pivotal");
 
-describe("Test for hubot-pivotal.js", function() {
-
-    let backupProjectIds;
-    let BRAIN_KEY_PROJECTS = 'projects_info';
-    let BRAIN_KEY_USERS    = 'users_info';
-    let BRAIN_KEY_ACCOUNT  = 'account_info';
+describe("Test for project info control feature", function() {
 
     // initial setup
     before(function(done) {
-        backupProjectIds = process.env.PROJECT_IDS;
+        TestUtil.commonBefore();
         done();
     });
 
     // teardown for each test
     afterEach(function(done) {
-        if (!backupProjectIds) {
-            // revert to undefined.
-            delete process.env.PROJECT_IDS;
-        } else {
-            process.env.PROJECT_IDS = backupProjectIds;
-        }
+        TestUtil.commonAfterEach();
         done();
     });
 
@@ -59,7 +51,7 @@ describe("Test for hubot-pivotal.js", function() {
             }
         }
 
-        dummyRobot.brain.set(BRAIN_KEY_PROJECTS, testData);
+        dummyRobot.brain.set(TestConst.BRAIN_KEY_PROJECTS, testData);
         // test
         let reply = dummyRobot.testRun(targetScript, "show pivotal projects");
 
@@ -83,7 +75,7 @@ describe("Test for hubot-pivotal.js", function() {
                 description: 'description for A'
             }
         };
-        dummyRobot.brain.set(BRAIN_KEY_PROJECTS, testData);
+        dummyRobot.brain.set(TestConst.BRAIN_KEY_PROJECTS, testData);
 
         // test
         let reply = dummyRobot.testRun(targetScript, "show pivotal projects");
@@ -160,7 +152,7 @@ describe("Test for hubot-pivotal.js", function() {
                 // check
                 try {
                    chai.expect(reply).to.have.string("OK!");
-                   let storedData = dummyRobot.brain.get(BRAIN_KEY_PROJECTS);
+                   let storedData = dummyRobot.brain.get(TestConst.BRAIN_KEY_PROJECTS);
                    chai.expect(storedData[12345678]).to.be.not.empty;
                    chai.expect(storedData[12345678]['name']).to.equal('My Project');
                    chai.expect(storedData[12345678]['url']).to.endWith('12345678');
@@ -199,99 +191,6 @@ describe("Test for hubot-pivotal.js", function() {
             });
     });
 
-    it("show story summary w/ normal response.", function(done) {
-        let dummyRobot = new DummyRobot();
-        let spyRespond = sinon.spy(dummyRobot, "captureSend");
-        let testResponse = {
-            kind: 'story',
-            id: 12345678,
-            created_at: '2017-02-15T05:36:01Z',
-            updated_at: '2017-05-30T11:15:56Z',
-            estimate: 1,
-            story_type: 'bug',
-            name: 'This is a test ticket',
-            description: 'Description for test ticket.',
-            current_state: 'planned',
-            requested_by_id: 2222222,
-            url: 'https://www.pivotaltracker.com/story/show/12345678',
-            project_id: 3333333,
-            owner_ids: [],
-            labels: []
-        }
-
-        dummyRobot.addHttpMockResponse(() => {
-            return JSON.stringify(testResponse);
-        });
-
-        let testData = {
-            1111 : {
-                id  : 1111,
-                name: 'project A',
-                url: 'http//test/a',
-                description: 'description for A'
-            }
-        };
-        dummyRobot.brain.set(BRAIN_KEY_PROJECTS, testData);
-
-        // test
-        let reply = dummyRobot.testRun(
-            targetScript,
-            "let me check pv#12345678, please.",
-            function (reply) {
-                // check
-                try {
-                    chai.expect(reply).to.have.string("This is a test ticket");
-                    chai.expect(reply).to.have.string("#12345678");
-                    chai.expect(reply).to.have.string("https://www.pivotaltracker.com");
-                    chai.expect(reply).to.have.string("Type:bug");
-                    chai.expect(reply).to.have.string("Status:planned");
-                    chai.expect(reply).to.have.string("Point:1");
-                } catch (err) {
-                    done(err);
-                    return;
-                }
-                done();
-            });
-    });
-
-    it("show story summary w/ no project info.", function() {
-        let dummyRobot = new DummyRobot();
-        let spyRespond = sinon.spy(dummyRobot, "captureSend");
-        // test
-        let reply = dummyRobot.testRun(
-            targetScript,
-            "let me check pv#12345678, please."
-        );
-        // check
-        chai.expect(spyRespond.called).to.be.ng;
-    });
-
-    it("show story summary w/ error response.", function() {
-        let dummyRobot = new DummyRobot();
-        let spyRespond = sinon.spy(dummyRobot, "captureSend");
-
-        dummyRobot.addHttpMockResponse(() => {
-            return '{"code": "unfound_resource"}';
-        });
-
-        let testData = {
-            1111 : {
-                id  : 1111,
-                name: 'project A',
-                url: 'http//test/a',
-                description: 'description for A'
-            }
-        };
-        dummyRobot.brain.set(BRAIN_KEY_PROJECTS, testData);
-
-        // test
-        let reply = dummyRobot.testRun(
-            targetScript,
-            "let me check pv#12345678, please.");
-        // check
-        chai.expect(spyRespond.called).to.be.ng;
-    });
-
     it("remove project normally.", function() {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
@@ -304,7 +203,7 @@ describe("Test for hubot-pivotal.js", function() {
                 description: 'description for A'
             }
         };
-        dummyRobot.brain.set(BRAIN_KEY_PROJECTS, testData);
+        dummyRobot.brain.set(TestConst.BRAIN_KEY_PROJECTS, testData);
 
         // test
         let reply = dummyRobot.testRun(targetScript, "remove pivotal project #1111");
@@ -312,7 +211,7 @@ describe("Test for hubot-pivotal.js", function() {
         // check
         chai.expect(spyRespond.called).to.be.ok;
         chai.expect(reply).to.have.string("Done");
-        chai.expect(dummyRobot.brain.get(BRAIN_KEY_PROJECTS)).to.be.null;
+        chai.expect(dummyRobot.brain.get(TestConst.BRAIN_KEY_PROJECTS)).to.be.null;
     });
 
     it("remove project w/ wrong project id.", function() {
@@ -327,7 +226,7 @@ describe("Test for hubot-pivotal.js", function() {
                 description: 'description for A'
             }
         };
-        dummyRobot.brain.set(BRAIN_KEY_PROJECTS, testData);
+        dummyRobot.brain.set(TestConst.BRAIN_KEY_PROJECTS, testData);
 
         // test
         let reply = dummyRobot.testRun(targetScript, "remove pivotal project #2222");
@@ -335,7 +234,7 @@ describe("Test for hubot-pivotal.js", function() {
         // check
         chai.expect(spyRespond.called).to.be.ok;
         chai.expect(reply).to.have.string("not registered");
-        let remainingData = dummyRobot.brain.get(BRAIN_KEY_PROJECTS);
+        let remainingData = dummyRobot.brain.get(TestConst.BRAIN_KEY_PROJECTS);
         chai.expect(remainingData).to.be.not.null;
         chai.expect(remainingData["1111"]).to.be.not.null;
     });
@@ -350,67 +249,6 @@ describe("Test for hubot-pivotal.js", function() {
         // check
         chai.expect(spyRespond.called).to.be.ok;
         chai.expect(reply).to.have.string("no project info");
-        chai.expect(dummyRobot.brain.get(BRAIN_KEY_PROJECTS)).to.be.null;
+        chai.expect(dummyRobot.brain.get(TestConst.BRAIN_KEY_PROJECTS)).to.be.null;
     });
-
-
-
-    it ("show user's all tickets.", function(done) {
-
-    });
-
-    it ("show user's all tickets (there is no user's ticket)", function(done) {
-        fail();
-    });
-    
-    it ("show user's all tickets w/o user info.", function(done) {
-        fail();
-    });
-
-    it ("show user's all tickets w/o project info.", function(done) {
-        fail();
-    });
-
-
 });
-
-function _createTestResponseForLinkUser() {
-    return [
-        {
-            "id": 111, 
-            "kind": "account_membership", 
-            "person": {
-                "email": "yasu@tenka.com", 
-                "id": 111, 
-                "initials": "IT", 
-                "kind": "person", 
-                "name": "Ieyasu Tokugawa", 
-                "username": "tanuki"
-            }
-        }, 
-        {
-            "id": 222, 
-            "kind": "account_membership", 
-            "person": {
-                "email": "hide@tenka.com", 
-                "id": 222, 
-                "initials": "HT", 
-                "kind": "person", 
-                "name": "Hideyoshi Toyotomi", 
-                "username": "saru"
-            }
-        }, 
-        {
-            "id": 333, 
-            "kind": "account_membership", 
-            "person": {
-                "email": "nobu@tenks.com", 
-                "id": 333, 
-                "initials": "NO", 
-                "kind": "person", 
-                "name": "Nobunaga Oda", 
-                "username": "utsuke"
-            }
-        }
-    ];
-}

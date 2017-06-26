@@ -10,13 +10,7 @@ chai.use(require('chai-string'));
 var DummyRobot   = require('./dummy-robot');
 var targetScript = require("../src/scripts/hubot-pivotal");
 
-
 describe("Test for user link/unlink feature", function() {
-
-    // let backupProjectIds;
-    // let TestConst.BRAIN_KEY_PROJECTS = 'projects_info';
-    // let TestConst.BRAIN_KEY_USERS    = 'users_info';
-    // let TestConst.BRAIN_KEY_ACCOUNT  = 'account_info';
 
     // initial setup
     before(function(done) {
@@ -30,7 +24,7 @@ describe("Test for user link/unlink feature", function() {
         done();
     });
 
-        it("link pivotal user by name.", function(done) {
+    it("link pivotal user by name.", function(done) {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
 
