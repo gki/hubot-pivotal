@@ -26,6 +26,8 @@ module.exports = function (robot) {
 
     robot.respond(/unlink me from pivotal user/i, messageHandling('unlink_user'));
 
+    robot.respond(/show my pivotal tickets/i, messageHandling('user_tickets'));
+
     function messageHandling(route) {
         return function(msg) {
             // console.log("route=" + route);
@@ -42,6 +44,8 @@ module.exports = function (robot) {
                     linkUser(msg, msg.match[1])
                 } else if (route === 'unlink_user') {
                     unlinkUser(msg);
+                } else if (route === 'user_tickets') {
+                    replyUserTickets(msg);
                 }
             } catch (e) {
                 error(e, msg);
@@ -202,6 +206,39 @@ module.exports = function (robot) {
         robot.brain.save();
     }
 
+    function replyUserTickets(msg) {
+        // check user info from brain
+       let usersInfo = robot.brain.get(BRAIN_KEY_USERS);
+        if (!usersInfo || !usersInfo[msg.message.user.name]) {
+            msg.send("There is no liked pivotal user in my brain. Please link yourself at first.");
+            return;
+        }
+
+        // check project info from brain
+        let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
+        if (!projectsInfo) {
+            msg.send("Hahaha. I can't find any tickets for you because there is no project info!");
+            return;
+        }
+
+        // get all tickets from all projects.
+        // https://www.pivotaltracker.com/services/v5/projects/1960417/search?query=owner%3A1827588+AND+includedone%3Afalse
+
+    }
+
+    function replyStorySummary(msg, storyId) {
+        let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
+        if (!projectsInfo) {
+            // console.log("Ignore because there is no pivotal projet info in brain.")
+            return;
+        }
+
+        for (let key in projectsInfo) {
+            _replyStorySummary(msg, projectsInfo[key], storyId);
+        }
+    }
+
+    /**---------- private methods ----------**/
     function _setupAccountInfo(msg, completionCallback) {
         _createAccountApiClient()
         .get()(function(err, resp, body) {
@@ -226,28 +263,6 @@ module.exports = function (robot) {
             // console.log("Finished to setup account info.");
             completionCallback();
         });
-    }
-
-    function replyOwnTickets(msg) {
-        // check user info from brain
-
-        // check project info from brain
-
-        // get all tickets from all projects.
-        // https://www.pivotaltracker.com/services/v5/projects/1960417/search?query=owner%3A1827588+AND+includedone%3Afalse
-
-    }
-
-    function replyStorySummary(msg, storyId) {
-        let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
-        if (!projectsInfo) {
-            // console.log("Ignore because there is no pivotal projet info in brain.")
-            return;
-        }
-
-        for (let key in projectsInfo) {
-            _replyStorySummary(msg, projectsInfo[key], storyId);
-        }
     }
 
     function _replyStorySummary(msg, projectInfo, storyId) {
