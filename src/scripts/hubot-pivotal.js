@@ -264,7 +264,7 @@ module.exports = function (robot) {
             let jsonRes = JSON.parse(body);
             if (_isPivotalApiError(jsonRes)) {
                 // no need to reply
-                console.log("Could not find any ticket for #" + storyId + " in " + projectInfo["name"]);
+                // console.log("Could not find any ticket for #" + storyId + " in " + projectInfo["name"]);
                 return;
             }
 
