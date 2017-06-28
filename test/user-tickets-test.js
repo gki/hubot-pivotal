@@ -33,6 +33,41 @@ describe("Test for user tickets feature", function() {
         fail();
     });
     
+    it ("show user's all tickets w/ http error response.", function() {
+        let dummyRobot = new DummyRobot();
+        let spyRespond = sinon.spy(dummyRobot, "captureSend");
+
+        dummyRobot.addHttpMockError(() => {
+            return new Error('dummy errro.');
+        });
+
+        let registeredData = {};
+        registeredData[dummyRobot.userName] = {
+            pv_id   : "111",
+            pv_name : "Ieyasu Tokugawa"
+        };
+        dummyRobot.brain.set(TestConst.BRAIN_KEY_USERS, registeredData);
+        let testData = {
+            1111 : {
+                id  : 1111,
+                name: 'project A',
+                url: 'http//test/a',
+                description: 'description for A'
+            }
+        };
+        dummyRobot.brain.set(TestConst.BRAIN_KEY_PROJECTS, testData);
+
+        // test
+        dummyRobot.testRun(targetScript,
+            "show my pivotal tickets");
+        chai.expect(spyRespond).to.not.be.called;
+
+    });
+
+    it ("show user's all tickets w/ pivotal api error.", function(done) {
+        fail();
+    });
+
     it ("show user's all tickets w/o user info.", function(done) {
         let dummyRobot = new DummyRobot();
         let spyRespond = sinon.spy(dummyRobot, "captureSend");
