@@ -39,7 +39,7 @@ describe("Test for story summary feature", function() {
             current_state: 'planned',
             requested_by_id: 2222222,
             url: 'https://www.pivotaltracker.com/story/show/12345678',
-            project_id: 3333333,
+            project_id: 1111,
             owner_ids: [],
             labels: []
         }
