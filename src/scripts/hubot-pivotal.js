@@ -237,7 +237,7 @@ module.exports = function (robot) {
                 let jsonRes = JSON.parse(body);
                 if (_isPivotalApiError(jsonRes)) {
                     // no need to reply
-                    console.log(`Could not find any search resylt for user id ${userId} in ${projectId}`);
+                    console.log(`Could not find any search result for user id ${userId} in ${projectId}`);
                     return;
                 }
 
