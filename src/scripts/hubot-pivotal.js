@@ -243,7 +243,7 @@ module.exports = function (robot) {
 
                 let stories = jsonRes.stories.stories;
                 let totalHits = jsonRes.stories.total_hits;
-                if (totalHits == 0) {
+                if (totalHits === 0) {
                     console.log(`There is no ticket for user id ${userId} in ${projectId}`);
                     return;
                 }
