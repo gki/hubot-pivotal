@@ -1,6 +1,6 @@
 {
   "name": "hubot-pivotal",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Hubot script to get Pivotal Tracker information.",
   "main": "index.js",
   "keywords": [
