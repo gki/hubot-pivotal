@@ -237,12 +237,17 @@ module.exports = function (robot) {
                 let jsonRes = JSON.parse(body);
                 if (_isPivotalApiError(jsonRes)) {
                     // no need to reply
-                    console.log(`Could not find any search result for user id ${userId} in ${projectId}`);
+                    console.log(`Pivotal API returned an error in search result for user id ${userId} in ${projectId}`);
                     return;
                 }
 
                 let stories = jsonRes.stories.stories;
-                msg.send(`You are owner for ${Object.keys(stories).length} tickets in ${projectsInfo[projectId].name}`);
+                let totalHits = jsonRes.stories.total_hits;
+                if (totalHits == 0) {
+                    console.log(`There is no ticket for user id ${userId} in ${projectId}`);
+                    return;
+                }
+                msg.send(`You are owner for ${totalHits} tickets in ${projectsInfo[projectId].name}`);
                 for (let key in stories) {
                     // console.log(stories[key].name);
                     msg.send(_createStorySummary(stories[key]));
