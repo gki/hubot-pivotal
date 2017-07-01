@@ -8,6 +8,13 @@
 # hubot-pivotal
 hubot plugin for pivotal tracker
 
+## Feature
+- Add project info to the hubot brain.
+- Show stored project list.
+- Show a story summary when your conversation includes `pv#1111111` format.
+- Link your chat user with a pivotal user.
+- Show all ticket summaries which you are registered as an owner.
+
 ## Installation
 In your hubot project, run
 ```
