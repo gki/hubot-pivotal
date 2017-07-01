@@ -223,7 +223,6 @@ module.exports = function (robot) {
 
         let userId = linkedUsersInfo.pv_id;
         // get all tickets from all projects.
-        // https://www.pivotaltracker.com/services/v5/projects/1960417/search?query=owner%3A1827588+AND+includedone%3Afalse
         for (let projectId in projectsInfo) {
             _createProjectApiClient(projectId
                 + `/search?query=owner:${userId} AND includedone:false`)
