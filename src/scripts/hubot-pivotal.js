@@ -26,6 +26,8 @@ module.exports = function (robot) {
 
     robot.respond(/unlink me from pivotal user/i, messageHandling('unlink_user'));
 
+    robot.respond(/show my pivotal tickets/i, messageHandling('user_tickets'));
+
     function messageHandling(route) {
         return function(msg) {
             // console.log("route=" + route);
@@ -42,6 +44,8 @@ module.exports = function (robot) {
                     linkUser(msg, msg.match[1])
                 } else if (route === 'unlink_user') {
                     unlinkUser(msg);
+                } else if (route === 'user_tickets') {
+                    replyUserTickets(msg);
                 }
             } catch (e) {
                 error(e, msg);
@@ -74,7 +78,7 @@ module.exports = function (robot) {
                 return;
             }
             let jsonRes = JSON.parse(body);
-            let name = jsonRes['name'];
+            name = jsonRes['name'];
             if (!name) {
                 msg.send(`Could not add project for id ${projectId}. Check permission or project id on your pivotal project.`)
                 return;
@@ -202,6 +206,68 @@ module.exports = function (robot) {
         robot.brain.save();
     }
 
+    function replyUserTickets(msg) {
+        // check user info from brain
+       let linkedUsersInfo = _getLinkedUserInfoFromBrain(msg);
+        if (!linkedUsersInfo) {
+            msg.send("There is no liked pivotal user in my brain. Please link yourself at first.");
+            return;
+        }
+
+        // check project info from brain
+        let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
+        if (!projectsInfo) {
+            msg.send("Hahaha. I can't find any tickets for you because there is no project info!");
+            return;
+        }
+
+        let userId = linkedUsersInfo.pv_id;
+        // get all tickets from all projects.
+        for (let projectId in projectsInfo) {
+            _createProjectApiClient(projectId
+                + `/search?query=owner:${userId} AND includedone:false`)
+            .get()(function(err, resp, body) {
+                if (err) {
+                    // no need to reply
+                    console.log(`Could not get search result for user id ${userId} of project id ${projectId} due to err response.`)
+                    return;
+                }
+                
+                let jsonRes = JSON.parse(body);
+                if (_isPivotalApiError(jsonRes)) {
+                    // no need to reply
+                    console.log(`Pivotal API returned an error in search result for user id ${userId} in ${projectId}`);
+                    return;
+                }
+
+                let stories = jsonRes.stories.stories;
+                let totalHits = jsonRes.stories.total_hits;
+                if (totalHits === 0) {
+                    console.log(`There is no ticket for user id ${userId} in ${projectId}`);
+                    return;
+                }
+                msg.send(`You are owner for ${totalHits} tickets in ${projectsInfo[projectId].name}`);
+                for (let key in stories) {
+                    // console.log(stories[key].name);
+                    msg.send(_createStorySummary(stories[key]));
+                }
+            });
+        }
+    }
+
+    function replyStorySummary(msg, storyId) {
+        let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
+        if (!projectsInfo) {
+            // console.log("Ignore because there is no pivotal projet info in brain.")
+            return;
+        }
+
+        for (let key in projectsInfo) {
+            _replyStorySummary(msg, projectsInfo[key], storyId);
+        }
+    }
+
+    /**---------- private methods ----------**/
     function _setupAccountInfo(msg, completionCallback) {
         _createAccountApiClient()
         .get()(function(err, resp, body) {
@@ -223,21 +289,9 @@ module.exports = function (robot) {
 
             robot.brain.set(BRAIN_KEY_ACCOUNT, accountInfo);
             robot.brain.save()
-            console.log("Finished to setup account info.");
+            // console.log("Finished to setup account info.");
             completionCallback();
         });
-    }
-
-    function replyStorySummary(msg, storyId) {
-        let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
-        if (!projectsInfo) {
-            console.log("Ignore because there is no pivotal projet info in brain.")
-            return;
-        }
-
-        for (let key in projectsInfo) {
-            _replyStorySummary(msg, projectsInfo[key], storyId);
-        }
     }
 
     function _replyStorySummary(msg, projectInfo, storyId) {
@@ -247,22 +301,41 @@ module.exports = function (robot) {
         .get()(function(err, resp, body) {
             if (err) {
                 // no need to reply
-                console.log(`Could not get ticket info for story id ${storyId} of project id ${projectInfo["id"]} due to err response.`)
+                // console.log(`Could not get ticket info for story id ${storyId} of project id ${projectInfo["id"]} due to err response.`)
                 return;
             }
             
             let jsonRes = JSON.parse(body);
             if (_isPivotalApiError(jsonRes)) {
                 // no need to reply
-                console.log("Could not find any ticket for #" + storyId + " in " + projectInfo["name"]);
+                // console.log("Could not find any ticket for #" + storyId + " in " + projectInfo["name"]);
                 return;
             }
 
-            let response = `#${jsonRes['id']} ${jsonRes['name']}\n` +
-                           `${jsonRes['url']} at ${projectInfo["name"]}\n` +
-                           `Type:${jsonRes['story_type']} Status:${jsonRes['current_state']} Point:${jsonRes['estimate']}`;
-            msg.send(response);
+            msg.send(_createStorySummary(jsonRes));
         });
+    }
+
+    function _createStorySummary(storyJson) {
+        let projectsInfo = robot.brain.get(BRAIN_KEY_PROJECTS);
+        let projectName = projectsInfo[storyJson.project_id].name;
+        if (!projectName) {
+            projectName = `Unknown(${storyJson.project_id})`;
+        }
+
+        let response = `#${storyJson['id']} ${storyJson['name']}\n` +
+                       `${storyJson['url']} at ${projectName}\n` +
+                       `Type:${storyJson['story_type']} Status:${storyJson['current_state']} Point:${storyJson['estimate']}\n`;
+        return response;
+    }
+
+    function _getLinkedUserInfoFromBrain(msg) {
+        let usersInfo = robot.brain.get(BRAIN_KEY_USERS);
+        if (!usersInfo) {
+            return null;
+        }
+
+        return usersInfo[msg.message.user.name];
     }
 
     function _createProjectApiClient(pathAfterBaseUrl) {
@@ -274,7 +347,7 @@ module.exports = function (robot) {
     }
 
     function _createApiClient(api, pathAfterBaseUrl) {
-        if (pathAfterBaseUrl === null) {
+        if (!pathAfterBaseUrl) {
             pathAfterBaseUrl = "";
         }
         return robot.http(PIVOTAL_API_BASE_URL + api + pathAfterBaseUrl)
