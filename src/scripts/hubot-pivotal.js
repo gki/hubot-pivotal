@@ -1,3 +1,20 @@
+// Description:
+//   Reply suitable Pivotal Tracker story infos you mentioned.
+//
+// Configuration:
+//   HUBOT_PIVOTAL_TOKEN - The access token for pivotal tracker which can be access all your projects.
+//
+// Commands:
+//   hubot add pivotal project #<project id>:Add a specified project info to the hubot brain.
+//   hubot show pivotal projects:Show stored project list.
+//   ~~ pv#<> ~~:Show a story summary when your conversation includes pv#1111111 format.
+//   hubot link me with pivotal user <hint>:Link your chat user with a pivotal user by <hint> (Name, initial or user id)
+//   hubot unlink me from pivotal user:Unlink you from a registered pivotal user from hubot brain.
+//   hubot show my pivotal tickets:Show all ticket summaries which you are registered as an owner.
+//
+// Author:
+//   gki <gki.penguin@gmail.com>
+
 "use strict";
 
 var pad = require('pad');
